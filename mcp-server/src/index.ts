@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { McpServer } from '@modelcontextprotocol/server';
-import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { BridgeClient } from './lib/bridge-client.js';
 import { registerAskRemote } from './tools/ask-remote.js';
 import { registerNotifyRemote } from './tools/notify-remote.js';

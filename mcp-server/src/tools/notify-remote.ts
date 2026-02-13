@@ -1,18 +1,14 @@
 import { z } from 'zod';
-import type { McpServer } from '@modelcontextprotocol/server';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BridgeClient } from '../lib/bridge-client.js';
 
 export function registerNotifyRemote(server: McpServer, client: BridgeClient, sessionId: string) {
-  server.registerTool(
+  server.tool(
     'notify_remote',
+    'Send a fire-and-forget status notification to the user via Telegram. ' +
+      'Use this to keep the user informed about session progress (e.g., "Tests passed", "Starting deployment").',
     {
-      title: 'Notify Remote',
-      description:
-        'Send a fire-and-forget status notification to the user via Telegram. ' +
-        'Use this to keep the user informed about session progress (e.g., "Tests passed", "Starting deployment").',
-      inputSchema: {
-        text: z.string().describe('The notification message'),
-      },
+      text: z.string().describe('The notification message'),
     },
     async ({ text }) => {
       await client.notify(text, sessionId);
