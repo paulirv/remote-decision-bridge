@@ -53,14 +53,14 @@ export class BridgeClient {
   }
 
   /** Send a fire-and-forget notification. */
-  async notify(text: string, sessionId: string): Promise<void> {
+  async notify(text: string, sessionId: string, severity?: string): Promise<void> {
     await fetch(`${this.config.workerUrl}/notify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.config.bridgeSecret}`,
       },
-      body: JSON.stringify({ text, sessionId }),
+      body: JSON.stringify({ text, sessionId, severity }),
     });
   }
 }

@@ -15,7 +15,7 @@ app.post('/', async (c) => {
     return c.json({ error: 'Missing required fields: text, sessionId' }, 400);
   }
 
-  await sendNotification(c.env, body.text, body.sessionId);
+  await sendNotification(c.env, body.text, body.sessionId, body.severity);
   return c.json({ ok: true });
 });
 

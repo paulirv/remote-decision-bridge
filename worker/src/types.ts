@@ -23,7 +23,10 @@ export interface StoredQuestion {
   answer?: string;
 }
 
+export type NotifySeverity = 'info' | 'warning' | 'error';
+
 export interface NotifyPayload {
   text: string;
   sessionId: string;
+  severity?: NotifySeverity;
 }

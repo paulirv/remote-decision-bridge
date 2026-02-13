@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Env, StoredQuestion } from '../types.js';
+import { sendAnswerConfirmation } from '../lib/telegram.js';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -54,6 +55,11 @@ app.post('/', async (c) => {
       expirationTtl: 120,
     });
 
+    // Thread confirmation reply to the original question message
+    if (question.telegramMessageId) {
+      await sendAnswerConfirmation(c.env, answer, question.telegramMessageId);
+    }
+
     return c.json({ ok: true });
   }
 
@@ -71,6 +77,11 @@ app.post('/', async (c) => {
         await c.env.QUESTIONS.put(`q:${pendingQuestionId}`, JSON.stringify(question), {
           expirationTtl: 120,
         });
+
+        // Thread confirmation reply to the original question message
+        if (question.telegramMessageId) {
+          await sendAnswerConfirmation(c.env, update.message.text, question.telegramMessageId);
+        }
       }
       await c.env.QUESTIONS.delete(`pending:${chatId}`);
     }
