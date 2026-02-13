@@ -13,8 +13,10 @@ export async function sendQuestion(
   text: string,
   options: string[],
   sessionId: string,
+  project?: string,
 ): Promise<number | undefined> {
-  const message = `*Decision Needed*\n_Session: ${escapeMarkdown(sessionId)}_\n\n${escapeMarkdown(text)}`;
+  const header = project ? `*${escapeMarkdown(project)}* — Decision Needed` : '*Decision Needed*';
+  const message = `${header}\n_Session: ${escapeMarkdown(sessionId)}_\n\n${escapeMarkdown(text)}`;
 
   const keyboard: InlineKeyboardButton[][] = options.map((opt, i) => [
     { text: `${i + 1}. ${opt}`, callback_data: `${questionId}:${i}` },
@@ -54,9 +56,11 @@ export async function sendNotification(
   text: string,
   sessionId: string,
   severity: NotifySeverity = 'info',
+  project?: string,
 ): Promise<void> {
   const emoji = SEVERITY_EMOJI[severity];
-  const message = `${emoji} *Status Update*\n_Session: ${escapeMarkdown(sessionId)}_\n\n${escapeMarkdown(text)}`;
+  const header = project ? `${emoji} *${escapeMarkdown(project)}* — Status Update` : `${emoji} *Status Update*`;
+  const message = `${header}\n_Session: ${escapeMarkdown(sessionId)}_\n\n${escapeMarkdown(text)}`;
 
   const res = await fetch(`${TELEGRAM_API}/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
     method: 'POST',

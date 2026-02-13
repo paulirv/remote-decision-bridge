@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BridgeClient } from '../lib/bridge-client.js';
 
-export function registerNotifyRemote(server: McpServer, client: BridgeClient, sessionId: string) {
+export function registerNotifyRemote(server: McpServer, client: BridgeClient, sessionId: string, project?: string) {
   server.tool(
     'notify_remote',
     'Send a fire-and-forget status notification to the user via Telegram. ' +
@@ -17,7 +17,7 @@ export function registerNotifyRemote(server: McpServer, client: BridgeClient, se
         .describe('Notification severity level — controls emoji prefix'),
     },
     async ({ text, severity }) => {
-      await client.notify(text, sessionId, severity);
+      await client.notify(text, sessionId, severity, project);
       return {
         content: [{ type: 'text' as const, text: 'Notification sent.' }],
       };

@@ -4,7 +4,7 @@ export class BridgeClient {
   constructor(private config: BridgeConfig) {}
 
   /** Send a question to the Worker and return the question ID. */
-  async postQuestion(text: string, options: string[], sessionId: string): Promise<string> {
+  async postQuestion(text: string, options: string[], sessionId: string, project?: string): Promise<string> {
     const res = await fetch(`${this.config.workerUrl}/question`, {
       method: 'POST',
       headers: {
@@ -15,6 +15,7 @@ export class BridgeClient {
         text,
         options,
         sessionId,
+        project,
         timeout: Math.floor(this.config.timeoutMs / 1000),
       }),
     });
@@ -53,14 +54,14 @@ export class BridgeClient {
   }
 
   /** Send a fire-and-forget notification. */
-  async notify(text: string, sessionId: string, severity?: string): Promise<void> {
+  async notify(text: string, sessionId: string, severity?: string, project?: string): Promise<void> {
     await fetch(`${this.config.workerUrl}/notify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${this.config.bridgeSecret}`,
       },
-      body: JSON.stringify({ text, sessionId, severity }),
+      body: JSON.stringify({ text, sessionId, severity, project }),
     });
   }
 }

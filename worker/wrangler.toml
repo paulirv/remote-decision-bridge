@@ -1,15 +1,16 @@
 name = "remote-decision-bridge"
+account_id = "bb4c9b919e317b42c003591ab2cc4ecd"
 main = "src/index.ts"
 compatibility_date = "2025-02-01"
 compatibility_flags = ["nodejs_compat"]
 
 [[kv_namespaces]]
 binding = "QUESTIONS"
-id = ""          # Fill after: wrangler kv namespace create QUESTIONS
-preview_id = ""  # Fill after: wrangler kv namespace create QUESTIONS --preview
+id = "c0e983cc4d6b4f799d7c6350a2ace6b6"
+preview_id = "37a90bf4a0ee4ec289526991023c331e"
 
 [vars]
-TELEGRAM_CHAT_ID = ""  # Your Telegram chat ID
+TELEGRAM_CHAT_ID = "7847771855"
 
 # Secrets (set via `wrangler secret put`):
 # - TELEGRAM_BOT_TOKEN

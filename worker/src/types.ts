@@ -9,6 +9,7 @@ export interface QuestionPayload {
   text: string;
   options: string[];
   sessionId: string;
+  project?: string;
   timeout?: number; // seconds, default 600
 }
 
@@ -17,6 +18,7 @@ export interface StoredQuestion {
   text: string;
   options: string[];
   sessionId: string;
+  project?: string;
   telegramMessageId?: number;
   createdAt: string;
   answeredAt?: string;
@@ -28,5 +30,6 @@ export type NotifySeverity = 'info' | 'warning' | 'error';
 export interface NotifyPayload {
   text: string;
   sessionId: string;
+  project?: string;
   severity?: NotifySeverity;
 }

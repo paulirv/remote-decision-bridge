@@ -23,6 +23,7 @@ app.post('/', async (c) => {
     text: body.text,
     options: body.options,
     sessionId: body.sessionId,
+    project: body.project,
     createdAt: new Date().toISOString(),
   };
 
@@ -32,7 +33,7 @@ app.post('/', async (c) => {
   });
 
   // Send to Telegram
-  const messageId = await sendQuestion(c.env, id, body.text, body.options, body.sessionId);
+  const messageId = await sendQuestion(c.env, id, body.text, body.options, body.sessionId, body.project);
 
   if (messageId) {
     question.telegramMessageId = messageId;

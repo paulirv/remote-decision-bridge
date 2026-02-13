@@ -14,6 +14,7 @@ if (!WORKER_URL || !BRIDGE_SECRET) {
 }
 
 const sessionId = process.env.BRIDGE_SESSION_ID ?? `session-${Date.now()}`;
+const project = process.env.BRIDGE_PROJECT;
 
 const client = new BridgeClient({
   workerUrl: WORKER_URL,
@@ -27,8 +28,8 @@ const server = new McpServer({
   version: '0.1.0',
 });
 
-registerAskRemote(server, client, sessionId);
-registerNotifyRemote(server, client, sessionId);
+registerAskRemote(server, client, sessionId, project);
+registerNotifyRemote(server, client, sessionId, project);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

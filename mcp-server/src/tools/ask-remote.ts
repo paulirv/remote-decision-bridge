@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { BridgeClient } from '../lib/bridge-client.js';
 
-export function registerAskRemote(server: McpServer, client: BridgeClient, sessionId: string) {
+export function registerAskRemote(server: McpServer, client: BridgeClient, sessionId: string, project?: string) {
   server.tool(
     'ask_remote',
     'Send a decision question to the user via Telegram and wait for their response. ' +
@@ -12,7 +12,7 @@ export function registerAskRemote(server: McpServer, client: BridgeClient, sessi
       options: z.array(z.string()).min(2).max(6).describe('Answer choices (2-6 options)'),
     },
     async ({ text, options }) => {
-      const questionId = await client.postQuestion(text, options, sessionId);
+      const questionId = await client.postQuestion(text, options, sessionId, project);
       const answer = await client.pollForAnswer(questionId);
 
       if (answer === null) {

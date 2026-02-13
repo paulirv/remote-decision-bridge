@@ -4,6 +4,7 @@ dist/
 .dev.vars
 .env
 .env.local
+.mcp.json
 *.log
 .DS_Store
 coverage/
