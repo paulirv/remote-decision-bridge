@@ -1,0 +1,16 @@
+name = "remote-decision-bridge"
+main = "src/index.ts"
+compatibility_date = "2025-02-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "QUESTIONS"
+id = ""          # Fill after: wrangler kv namespace create QUESTIONS
+preview_id = ""  # Fill after: wrangler kv namespace create QUESTIONS --preview
+
+[vars]
+TELEGRAM_CHAT_ID = ""  # Your Telegram chat ID
+
+# Secrets (set via `wrangler secret put`):
+# - TELEGRAM_BOT_TOKEN
+# - BRIDGE_SECRET (shared secret with MCP server)

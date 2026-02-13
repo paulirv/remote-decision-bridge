@@ -1,0 +1,17 @@
+{
+  "name": "remote-decision-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Remote decision bridge for Claude Code autonomous sessions — Cloudflare Worker + MCP Server + Telegram Bot",
+  "type": "module",
+  "scripts": {
+    "dev:worker": "pnpm --filter worker dev",
+    "dev:mcp": "pnpm --filter mcp-server dev",
+    "deploy": "pnpm --filter worker deploy",
+    "build": "pnpm -r build",
+    "type-check": "pnpm -r type-check",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
+  },
+  "license": "MIT"
+}
