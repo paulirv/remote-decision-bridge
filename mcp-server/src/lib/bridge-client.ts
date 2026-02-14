@@ -53,9 +53,9 @@ export class BridgeClient {
     return null; // Timed out
   }
 
-  /** Send a fire-and-forget notification. */
+  /** Send a notification. Throws on failure so callers can surface errors. */
   async notify(text: string, sessionId: string, severity?: string, project?: string): Promise<void> {
-    await fetch(`${this.config.workerUrl}/notify`, {
+    const res = await fetch(`${this.config.workerUrl}/notify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -63,6 +63,10 @@ export class BridgeClient {
       },
       body: JSON.stringify({ text, sessionId, severity, project }),
     });
+
+    if (!res.ok) {
+      throw new Error(`Bridge POST /notify failed: ${res.status} ${await res.text()}`);
+    }
   }
 }
 

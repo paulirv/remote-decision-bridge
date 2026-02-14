@@ -19,6 +19,14 @@ interface TelegramUpdate {
 
 /** POST /webhook/telegram — Telegram sends button taps and text replies here. */
 app.post('/', async (c) => {
+  // Verify webhook origin if secret is configured (set via Telegram setWebhook secret_token)
+  if (c.env.WEBHOOK_SECRET) {
+    const token = c.req.header('X-Telegram-Bot-Api-Secret-Token');
+    if (token !== c.env.WEBHOOK_SECRET) {
+      return c.json({ error: 'Forbidden' }, 403);
+    }
+  }
+
   const update = await c.req.json<TelegramUpdate>();
 
   // Handle inline keyboard button tap

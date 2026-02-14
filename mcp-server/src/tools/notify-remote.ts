@@ -17,10 +17,18 @@ export function registerNotifyRemote(server: McpServer, client: BridgeClient, se
         .describe('Notification severity level — controls emoji prefix'),
     },
     async ({ text, severity }) => {
-      await client.notify(text, sessionId, severity, project);
-      return {
-        content: [{ type: 'text' as const, text: 'Notification sent.' }],
-      };
+      try {
+        await client.notify(text, sessionId, severity, project);
+        return {
+          content: [{ type: 'text' as const, text: 'Notification sent.' }],
+        };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: 'text' as const, text: `Notification failed: ${message}` }],
+          isError: true,
+        };
+      }
     },
   );
 }
