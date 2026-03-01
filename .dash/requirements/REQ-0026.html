@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REQ-0026: Question Timeout & Expiry - remote-decision-bridge</title>
+  <style>
+    
+:root {
+  /* ── Colors ── */
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* ── Semantic Colors ── */
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+
+  /* ── Extended Palette ── */
+  --purple: #a855f7;
+  --cyan: #06b6d4;
+  --orange: #f97316;
+
+  /* ── Borders ── */
+  --border: #334155;
+
+  /* ── Spacing Scale ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* ── Typography ── */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+
+  --text-xs: 18px;
+  --text-sm: 20px;
+  --text-base: 24px;
+  --text-lg: 28px;
+  --text-xl: 34px;
+  --text-2xl: 40px;
+  --text-3xl: 48px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Border Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+
+  /* ── Status Colors (semantic mapping) ── */
+  --status-completed: var(--success);
+  --status-implemented: var(--cyan);
+  --status-active: var(--accent);
+  --status-approved: var(--purple);
+  --status-candidate: var(--orange);
+  --status-draft: var(--text-muted);
+  --status-rejected: var(--danger);
+  --status-deprecated: var(--text-dim);
+  --status-todo: var(--text-dim);
+  --status-in-progress: var(--cyan);
+  --status-done: var(--success);
+
+  /* ── Priority Colors ── */
+  --priority-must-have: var(--danger);
+  --priority-should-have: var(--warning);
+  --priority-could-have: var(--success);
+  --priority-wont-have: var(--text-dim);
+
+  /* ── Risk Colors ── */
+  --risk-high: var(--danger);
+  --risk-medium: var(--warning);
+  --risk-low: var(--success);
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+:root {
+  --bg: #0a1410;
+  --bg-card: #152420;
+  --bg-hover: #1e3530;
+  --text: #e8ede9;
+  --text-muted: #8fa898;
+  --text-dim: #5e7a68;
+  --accent: #4ade80;
+  --accent-hover: #86efac;
+  --border: #2d4a3a;
+  --purple: #a78bfa;
+  --cyan: #5eead4;
+  --orange: #fb923c;
+}
+    
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+    
+/* ── Hamburger Button ── */
+.hamburger-btn {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  transition: background var(--transition-fast);
+}
+
+.hamburger-btn:hover {
+  background: var(--bg-hover);
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ── Overlay ── */
+.nav-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.nav-menu-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Slide-in Menu ── */
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transition: right var(--transition-slow);
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-menu.open {
+  right: 0;
+}
+
+.nav-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-menu-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.nav-menu-close {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-2xl);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-close:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* ── Links ── */
+.nav-menu-links {
+  flex: 1;
+  padding: var(--space-sm) 0;
+  overflow-y: auto;
+}
+
+.nav-menu-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-link:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-menu-link.active {
+  color: var(--accent);
+  background: rgba(59,130,246,0.1);
+  border-right: 3px solid var(--accent);
+}
+
+.nav-menu-icon {
+  font-size: var(--text-lg);
+  width: 24px;
+  text-align: center;
+}
+
+.nav-menu-label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+/* ── Footer ── */
+.nav-menu-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.nav-menu-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nav-menu-meta-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-menu-meta-value {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.nav-menu-refresh {
+  display: block;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--accent);
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.nav-menu-refresh:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+    
+/* ── Badges ── */
+.c-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── Progress Bar ── */
+.c-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.c-progress-track {
+  width: 100%;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.c-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-slow);
+}
+
+.c-progress-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ── Entity Links ── */
+.c-entity-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+}
+
+.c-entity-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* ── Stat Cards ── */
+.c-stat {
+  text-align: center;
+}
+
+.c-stat-value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.c-stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* ── Breadcrumbs ── */
+.c-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.c-crumb {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.c-crumb:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.c-crumb--current {
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+.c-crumb-sep {
+  color: var(--text-dim);
+}
+
+
+    /* ── Page Header ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      min-width: 0;
+    }
+
+    .page-header-project {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
+      color: var(--accent);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .page-header-project + .c-breadcrumbs,
+    .page-header-project + .page-header-title {
+      padding-left: var(--space-md);
+      border-left: 2px solid var(--border);
+    }
+
+    .page-header-title {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-shrink: 0;
+    }
+
+    /* ── Refresh Button ── */
+    .refresh-btn {
+      width: 48px;
+      height: 48px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    }
+    .refresh-btn:hover {
+      background: var(--bg-hover);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .refresh-btn.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Main Content ── */
+    .page-main {
+      flex: 1;
+      padding: var(--space-lg);
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .page-header {
+        padding: var(--space-sm) var(--space-md);
+      }
+
+      .page-main {
+        padding: var(--space-md);
+      }
+    }
+
+    
+.req-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-lg);
+}
+.req-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+.req-meta-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+.req-meta-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-xs);
+}
+.req-meta-value {
+  font-size: var(--text-base);
+  color: var(--text);
+}
+.ac-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ac-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border);
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-icon { font-size: var(--text-lg); flex-shrink: 0; }
+.ac-id {
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+  min-width: 50px;
+}
+.ac-text { color: var(--text); }
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+.section-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  margin-bottom: var(--space-md);
+}
+.dep-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+.content-section {
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
+}
+.content-section h3, .content-section h4 {
+  color: var(--text);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+.content-section p { margin-bottom: var(--space-sm); }
+.content-section ul { padding-left: var(--space-lg); margin-bottom: var(--space-sm); }
+.content-section li { margin-bottom: var(--space-xs); }
+.content-section code {
+  background: var(--bg);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+.content-section pre {
+  background: var(--bg);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin-bottom: var(--space-md);
+}
+.content-section blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-md);
+  margin: var(--space-md) 0;
+  color: var(--text-dim);
+}
+
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-header-project">remote-decision-bridge</span>
+      <nav class="c-breadcrumbs"><a href="../dashboard.html" class="c-crumb">Dashboard</a><span class="c-crumb-sep">/</span><a href="../requirements-dashboard.html" class="c-crumb">Requirements</a><span class="c-crumb-sep">/</span><span class="c-crumb c-crumb--current">REQ-0026</span></nav>
+      
+    </div>
+    <div class="page-header-right">
+      <button class="refresh-btn" onclick="refreshDashboard()" aria-label="Refresh dashboard" title="Refresh dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"></path>
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+          <path d="M3 22v-6h6"></path>
+          <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+        </svg>
+      </button>
+      <button class="hamburger-btn" onclick="toggleNavMenu()" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  
+  <div class="nav-menu-overlay" id="nav-menu-overlay" onclick="closeNavMenu()"></div>
+  <nav class="nav-menu" id="nav-menu">
+    <div class="nav-menu-header">
+      <span class="nav-menu-title">Navigation</span>
+      <button class="nav-menu-close" onclick="closeNavMenu()" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="nav-menu-links">
+      <a href="mission-control.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎯</span>
+      <span class="nav-menu-label">Mission Control</span>
+    </a>
+      <a href="dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📊</span>
+      <span class="nav-menu-label">Dashboard</span>
+    </a>
+      <a href="requirements-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📋</span>
+      <span class="nav-menu-label">Requirements</span>
+    </a>
+      <a href="journal-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📖</span>
+      <span class="nav-menu-label">Journal</span>
+    </a>
+      <a href="product-spec.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📝</span>
+      <span class="nav-menu-label">Product Spec</span>
+    </a>
+      <a href="vision.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔭</span>
+      <span class="nav-menu-label">Vision</span>
+    </a>
+      <a href="ux-reviews-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎨</span>
+      <span class="nav-menu-label">UX Reviews</span>
+    </a>
+      <a href="bugs-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🐛</span>
+      <span class="nav-menu-label">Bugs</span>
+    </a>
+      <a href="traceability.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔗</span>
+      <span class="nav-menu-label">Traceability</span>
+    </a>
+      <a href="pm-cheatsheet.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📌</span>
+      <span class="nav-menu-label">PM Cheatsheet</span>
+    </a>
+      <a href="pm-reference.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📚</span>
+      <span class="nav-menu-label">PM Reference</span>
+    </a>
+    </div>
+    <div class="nav-menu-footer">
+      <div class="nav-menu-meta">
+        <span class="nav-menu-meta-label">Last generated</span>
+        <span class="nav-menu-meta-value">Feb 13, 2026, 1:03 PM</span>
+      </div>
+      <a href="/refresh" class="nav-menu-refresh" title="Regenerate dashboard">Refresh Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="page-main">
+    
+    <div class="req-header-row">
+      <h1 style="margin:0;font-size:var(--text-2xl);">REQ-0026: Question Timeout &amp; Expiry</h1>
+    </div>
+
+    <div class="req-meta">
+      <div class="req-meta-item">
+        <div class="req-meta-label">Status</div>
+        <div class="req-meta-value"><span class="c-badge c-badge--status" style="background:rgba(6,182,212,0.15);color:var(--status-implemented);">implemented</span></div>
+      </div>
+      <div class="req-meta-item">
+        <div class="req-meta-label">Priority</div>
+        <div class="req-meta-value"><span class="c-badge c-badge--priority" style="background:rgba(234,179,8,0.2);color:var(--priority-should-have);">should-have</span></div>
+      </div>
+      <div class="req-meta-item">
+        <div class="req-meta-label">Category</div>
+        <div class="req-meta-value">feature</div>
+      </div>
+      <div class="req-meta-item">
+        <div class="req-meta-label">Capability</div>
+        <div class="req-meta-value">CAP-06</div>
+      </div>
+      <div class="req-meta-item">
+        <div class="req-meta-label">AC Progress</div>
+        <div class="req-meta-value">4/4</div>
+      </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-title">Acceptance Criteria</div>
+        <div class="c-progress">
+    <div class="c-progress-track" style="height:8px;">
+      <div class="c-progress-fill" style="width:100%;background:var(--success);"></div>
+    </div>
+    <span class="c-progress-label">4/4 (100%)</span>
+  </div>
+        <ul class="ac-list" style="margin-top: var(--space-md);">
+          
+            <li class="ac-item">
+              <span class="ac-icon">✅</span>
+              <span class="ac-id">AC-01</span>
+              <span class="ac-text">MCP server `BRIDGE_TIMEOUT_MS` is configurable via environment variable (default 600000ms / 10 min)</span>
+            </li>
+          
+            <li class="ac-item">
+              <span class="ac-icon">✅</span>
+              <span class="ac-id">AC-02</span>
+              <span class="ac-text">Tool call returns a clear timeout indicator (not an error) when no answer is received within the timeout</span>
+            </li>
+          
+            <li class="ac-item">
+              <span class="ac-icon">✅</span>
+              <span class="ac-id">AC-03</span>
+              <span class="ac-text">KV entries have a TTL so expired questions are automatically cleaned up</span>
+            </li>
+          
+            <li class="ac-item">
+              <span class="ac-icon">✅</span>
+              <span class="ac-id">AC-04</span>
+              <span class="ac-text">Timeout behavior is distinguishable from network errors or other failures</span>
+            </li>
+          
+        </ul>
+      </div>
+    <div class="section-card">
+    <div class="section-title">Dependencies</div>
+    <div class="dep-list">
+      <a href="/requirements/REQ-0021.html" class="c-entity-link">REQ-0021: Remote Question Delivery</a> <a href="/requirements/REQ-0022.html" class="c-entity-link">REQ-0022: Remote Answer Collection</a>
+    </div>
+  </div>
+    
+    <div class="section-card">
+    <div class="section-title">Related To</div>
+    <div class="dep-list">
+      <a href="/requirements/REQ-0020.html" class="c-entity-link">REQ-0020</a>
+    </div>
+  </div>
+    <div class="section-card">
+        <div class="section-title">Solutions</div>
+        <div class="dep-list"><a href="/solutions/SOL-0003.html" class="c-entity-link">SOL-0003</a></div>
+      </div>
+    
+    <div class="section-card">
+        <div class="section-title">Details</div>
+        <div class="content-section"><p>Questions that go unanswered expire after a configurable timeout, allowing Claude Code to handle the timeout gracefully rather than hanging indefinitely. KV entries have a TTL so stale questions are automatically cleaned up. The MCP server returns a clear timeout indicator (not an error) to Claude Code.</p><h3>In Scope</h3>
+<ul>
+<li>Configurable timeout in MCP server polling loop</li>
+<li>KV TTL on question entries</li>
+<li>Timeout response format (distinct from errors)</li>
+<li>Graceful timeout handling in <code>ask_remote</code> tool</li>
+</ul>
+<h3>Out of Scope</h3>
+<ul>
+<li>Timeout notification to Telegram ("your question expired")</li>
+<li>Automatic retry or escalation on timeout</li>
+<li>Dynamic timeout adjustment</li>
+</ul><ul>
+<li>Default timeout: 600000ms (10 minutes) per product spec</li>
+<li>KV TTL should be longer than the MCP timeout to avoid premature cleanup</li>
+<li>Timeout response should include the question ID and a clear <code>&quot;status&quot;: &quot;timeout&quot;</code> indicator</li>
+<li>Consider exponential backoff on polling as the timeout approaches</li>
+</ul></div>
+      </div>
+  
+  </main>
+
+  <script>
+    
+function toggleNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+  var isOpen = menu.classList.contains('open');
+
+  menu.classList.toggle('open');
+  overlay.classList.toggle('open');
+  if (btn) btn.classList.toggle('open');
+}
+
+function closeNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+
+  menu.classList.remove('open');
+  overlay.classList.remove('open');
+  if (btn) btn.classList.remove('open');
+}
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeNavMenu();
+});
+
+
+    function refreshDashboard() {
+      var btn = document.querySelector('.refresh-btn');
+      if (btn) btn.classList.add('spinning');
+      var returnPath = window.location.pathname + window.location.search;
+      window.location.href = '/refresh?return=' + encodeURIComponent(returnPath);
+    }
+
+    
+  </script>
+</body>
+</html>

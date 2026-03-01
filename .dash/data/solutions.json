@@ -1,0 +1,30 @@
+{
+  "_meta": {
+    "generated": "2026-02-13T21:03:34.006Z",
+    "total": 1
+  },
+  "byId": {
+    "SOL-0003": {
+      "id": "SOL-0003",
+      "title": "MCP + Cloudflare Worker + Telegram Bridge",
+      "status": "implemented",
+      "approach": "build",
+      "effort": "s",
+      "risk": "low",
+      "htmlPath": "solutions/SOL-0003.html",
+      "requirements": [
+        "REQ-0021",
+        "REQ-0022",
+        "REQ-0023",
+        "REQ-0024",
+        "REQ-0025",
+        "REQ-0026"
+      ]
+    }
+  },
+  "byStatus": {
+    "implemented": [
+      "SOL-0003"
+    ]
+  }
+}

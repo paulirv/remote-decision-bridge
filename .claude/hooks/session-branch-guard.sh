@@ -1,0 +1,1 @@
+/Users/paulirving/.claude/hooks/session-branch-guard.sh

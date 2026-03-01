@@ -1,0 +1,36 @@
+# Binary assets - protect repo size
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+*.tiff
+*.svg
+*.ico
+
+# Video/audio artifacts
+*.mp4
+*.mov
+*.avi
+*.mp3
+*.wav
+
+# Design files
+*.psd
+*.sketch
+*.fig
+*.xd
+*.ai
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Large generated files
+*.pdf
+
+# Machine-specific
+CLAUDE.local.md
+settings.local.json

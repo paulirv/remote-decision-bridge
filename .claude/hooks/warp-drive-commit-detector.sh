@@ -1,0 +1,1 @@
+/Users/paulirving/.claude/hooks/warp-drive-commit-detector.sh

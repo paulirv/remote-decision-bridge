@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Reference - remote-decision-bridge</title>
+  <style>
+    
+:root {
+  /* ── Colors ── */
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* ── Semantic Colors ── */
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+
+  /* ── Extended Palette ── */
+  --purple: #a855f7;
+  --cyan: #06b6d4;
+  --orange: #f97316;
+
+  /* ── Borders ── */
+  --border: #334155;
+
+  /* ── Spacing Scale ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* ── Typography ── */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+
+  --text-xs: 18px;
+  --text-sm: 20px;
+  --text-base: 24px;
+  --text-lg: 28px;
+  --text-xl: 34px;
+  --text-2xl: 40px;
+  --text-3xl: 48px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Border Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+
+  /* ── Status Colors (semantic mapping) ── */
+  --status-completed: var(--success);
+  --status-implemented: var(--cyan);
+  --status-active: var(--accent);
+  --status-approved: var(--purple);
+  --status-candidate: var(--orange);
+  --status-draft: var(--text-muted);
+  --status-rejected: var(--danger);
+  --status-deprecated: var(--text-dim);
+  --status-todo: var(--text-dim);
+  --status-in-progress: var(--cyan);
+  --status-done: var(--success);
+
+  /* ── Priority Colors ── */
+  --priority-must-have: var(--danger);
+  --priority-should-have: var(--warning);
+  --priority-could-have: var(--success);
+  --priority-wont-have: var(--text-dim);
+
+  /* ── Risk Colors ── */
+  --risk-high: var(--danger);
+  --risk-medium: var(--warning);
+  --risk-low: var(--success);
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+:root {
+  --bg: #0a1410;
+  --bg-card: #152420;
+  --bg-hover: #1e3530;
+  --text: #e8ede9;
+  --text-muted: #8fa898;
+  --text-dim: #5e7a68;
+  --accent: #4ade80;
+  --accent-hover: #86efac;
+  --border: #2d4a3a;
+  --purple: #a78bfa;
+  --cyan: #5eead4;
+  --orange: #fb923c;
+}
+    
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+    
+/* ── Hamburger Button ── */
+.hamburger-btn {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  transition: background var(--transition-fast);
+}
+
+.hamburger-btn:hover {
+  background: var(--bg-hover);
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ── Overlay ── */
+.nav-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.nav-menu-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Slide-in Menu ── */
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transition: right var(--transition-slow);
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-menu.open {
+  right: 0;
+}
+
+.nav-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-menu-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.nav-menu-close {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-2xl);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-close:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* ── Links ── */
+.nav-menu-links {
+  flex: 1;
+  padding: var(--space-sm) 0;
+  overflow-y: auto;
+}
+
+.nav-menu-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-link:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-menu-link.active {
+  color: var(--accent);
+  background: rgba(59,130,246,0.1);
+  border-right: 3px solid var(--accent);
+}
+
+.nav-menu-icon {
+  font-size: var(--text-lg);
+  width: 24px;
+  text-align: center;
+}
+
+.nav-menu-label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+/* ── Footer ── */
+.nav-menu-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.nav-menu-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nav-menu-meta-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-menu-meta-value {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.nav-menu-refresh {
+  display: block;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--accent);
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.nav-menu-refresh:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+    
+/* ── Badges ── */
+.c-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── Progress Bar ── */
+.c-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.c-progress-track {
+  width: 100%;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.c-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-slow);
+}
+
+.c-progress-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ── Entity Links ── */
+.c-entity-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+}
+
+.c-entity-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* ── Stat Cards ── */
+.c-stat {
+  text-align: center;
+}
+
+.c-stat-value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.c-stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* ── Breadcrumbs ── */
+.c-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.c-crumb {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.c-crumb:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.c-crumb--current {
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+.c-crumb-sep {
+  color: var(--text-dim);
+}
+
+
+    /* ── Page Header ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      min-width: 0;
+    }
+
+    .page-header-project {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
+      color: var(--accent);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .page-header-project + .c-breadcrumbs,
+    .page-header-project + .page-header-title {
+      padding-left: var(--space-md);
+      border-left: 2px solid var(--border);
+    }
+
+    .page-header-title {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-shrink: 0;
+    }
+
+    /* ── Refresh Button ── */
+    .refresh-btn {
+      width: 48px;
+      height: 48px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    }
+    .refresh-btn:hover {
+      background: var(--bg-hover);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .refresh-btn.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Main Content ── */
+    .page-main {
+      flex: 1;
+      padding: var(--space-lg);
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .page-header {
+        padding: var(--space-sm) var(--space-md);
+      }
+
+      .page-main {
+        padding: var(--space-md);
+      }
+    }
+
+    
+.doc-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
+}
+.doc-content h1 { font-size: var(--text-2xl); color: var(--text); margin-bottom: var(--space-lg); }
+.doc-content h2 { font-size: var(--text-xl); color: var(--text); margin-top: var(--space-xl); margin-bottom: var(--space-md); border-bottom: 1px solid var(--border); padding-bottom: var(--space-sm); }
+.doc-content h3 { font-size: var(--text-lg); color: var(--text); margin-top: var(--space-lg); margin-bottom: var(--space-sm); }
+.doc-content h4 { font-size: var(--text-base); color: var(--text); margin-top: var(--space-md); margin-bottom: var(--space-xs); }
+.doc-content p { margin-bottom: var(--space-md); }
+.doc-content ul, .doc-content ol { padding-left: var(--space-xl); margin-bottom: var(--space-md); }
+.doc-content li { margin-bottom: var(--space-xs); }
+.doc-content code { background: var(--bg); padding: 2px 6px; border-radius: var(--radius-sm); font-size: var(--text-sm); }
+.doc-content pre { background: var(--bg); padding: var(--space-md); border-radius: var(--radius-md); overflow-x: auto; margin-bottom: var(--space-md); }
+.doc-content blockquote { border-left: 3px solid var(--accent); padding-left: var(--space-md); margin: var(--space-md) 0; color: var(--text-dim); }
+.doc-content strong { color: var(--text); }
+.doc-content hr { border: none; border-top: 1px solid var(--border); margin: var(--space-xl) 0; }
+
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-header-project">remote-decision-bridge</span>
+      <nav class="c-breadcrumbs"><a href="dashboard.html" class="c-crumb">Dashboard</a><span class="c-crumb-sep">/</span><span class="c-crumb c-crumb--current">PM Reference</span></nav>
+      
+    </div>
+    <div class="page-header-right">
+      <button class="refresh-btn" onclick="refreshDashboard()" aria-label="Refresh dashboard" title="Refresh dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"></path>
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+          <path d="M3 22v-6h6"></path>
+          <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+        </svg>
+      </button>
+      <button class="hamburger-btn" onclick="toggleNavMenu()" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  
+  <div class="nav-menu-overlay" id="nav-menu-overlay" onclick="closeNavMenu()"></div>
+  <nav class="nav-menu" id="nav-menu">
+    <div class="nav-menu-header">
+      <span class="nav-menu-title">Navigation</span>
+      <button class="nav-menu-close" onclick="closeNavMenu()" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="nav-menu-links">
+      <a href="mission-control.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎯</span>
+      <span class="nav-menu-label">Mission Control</span>
+    </a>
+      <a href="dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📊</span>
+      <span class="nav-menu-label">Dashboard</span>
+    </a>
+      <a href="requirements-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📋</span>
+      <span class="nav-menu-label">Requirements</span>
+    </a>
+      <a href="journal-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📖</span>
+      <span class="nav-menu-label">Journal</span>
+    </a>
+      <a href="product-spec.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📝</span>
+      <span class="nav-menu-label">Product Spec</span>
+    </a>
+      <a href="vision.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔭</span>
+      <span class="nav-menu-label">Vision</span>
+    </a>
+      <a href="ux-reviews-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎨</span>
+      <span class="nav-menu-label">UX Reviews</span>
+    </a>
+      <a href="bugs-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🐛</span>
+      <span class="nav-menu-label">Bugs</span>
+    </a>
+      <a href="traceability.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔗</span>
+      <span class="nav-menu-label">Traceability</span>
+    </a>
+      <a href="pm-cheatsheet.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📌</span>
+      <span class="nav-menu-label">PM Cheatsheet</span>
+    </a>
+      <a href="pm-reference.html" class="nav-menu-link active">
+      <span class="nav-menu-icon">📚</span>
+      <span class="nav-menu-label">PM Reference</span>
+    </a>
+    </div>
+    <div class="nav-menu-footer">
+      <div class="nav-menu-meta">
+        <span class="nav-menu-meta-label">Last generated</span>
+        <span class="nav-menu-meta-value">Feb 13, 2026, 1:03 PM</span>
+      </div>
+      <a href="/refresh" class="nav-menu-refresh" title="Regenerate dashboard">Refresh Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="page-main">
+    <div class="doc-content"><h1>Enterprise Project Management System - Complete Reference</h1>
+<blockquote>
+<p><strong>Version</strong>: 1.0.0</p>
+<p><strong>Last Updated</strong>: 2026-01-21</p>
+<p><strong>Author</strong>: Paul Irving / Insite Web Publishing, Inc.</p>
+</blockquote>
+<p>This document provides a complete reference for managing projects from inception to completion using the Claude Code project management system. It covers every command, agent, hook, and template, explaining how they work together as an integrated system.</p>
+<hr>
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#system-overview">System Overview</a></li>
+<li><a href="#project-lifecycle">Project Lifecycle</a></li>
+<li><a href="#phase-1-project-initialization">Phase 1: Project Initialization</a></li>
+<li><a href="#phase-2-requirements--planning">Phase 2: Requirements & Planning</a></li>
+<li><a href="#phase-3-sprint-execution">Phase 3: Sprint Execution</a></li>
+<li><a href="#phase-4-release-management">Phase 4: Release Management</a></li>
+<li><a href="#phase-5-operations--maintenance">Phase 5: Operations & Maintenance</a></li>
+<li><a href="#command-reference">Command Reference</a></li>
+<li><a href="#agent-reference">Agent Reference</a></li>
+<li><a href="#hook-reference">Hook Reference</a></li>
+<li><a href="#template-reference">Template Reference</a></li>
+<li><a href="#entity-id-system">Entity ID System</a></li>
+<li><a href="#file-structure">File Structure</a></li>
+<li><a href="#integration-patterns">Integration Patterns</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+</ol>
+<hr>
+<h2>System Overview</h2>
+<h3>Philosophy</h3>
+<p>This system follows a <strong>"solo-first, team-ready"</strong> design philosophy:</p>
+<ul>
+<li><strong>Solo developers</strong> get lightweight tooling that doesn't add bureaucratic overhead</li>
+<li><strong>Teams</strong> can scale up the same tooling for formal project management</li>
+<li><strong>Risk-appropriate</strong> - use more rigor for high-stakes projects, less for sandboxes</li>
+</ul>
+<h3>Core Systems</h3>
+<p>The project management system consists of five integrated subsystems:</p>
+<table class="md-table"><thead><tr><th>System</th><th>Purpose</th><th>Key Entities</th></tr></thead><tbody><tr><td><strong>Planning</strong></td><td>Define vision and product</td><td>Vision, Product Spec, CAP-NN</td></tr><tr><td><strong>Requirements</strong></td><td>Define what to build</td><td>REQ-NNNN, SOL-NNNN</td></tr><tr><td><strong>Sprints</strong></td><td>Plan and execute work</td><td>SPRINT-NN, Backlog</td></tr><tr><td><strong>Releases</strong></td><td>Deploy to production</td><td>REL-NNNN, DEPLOY-*</td></tr><tr><td><strong>Risk & Quality</strong></td><td>Manage uncertainty</td><td>RISK-NNNN, INC-NNNN, CR-NNNN</td></tr></tbody></table>
+<h3>Entity Relationships</h3>
+<pre><code>
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│   Vision    │─────▶│   Product   │─────▶│  Backlog    │
+│  (optional) │      │    Spec     │      │   Items     │
+└─────────────┘      └──────┬──────┘      └──────┬──────┘
+                            │                     │
+                      CAP-NN│                     │
+                            ▼                     ▼
+                     ┌──────────┐      ┌─────────────┐      ┌─────────────┐
+                     │   REQ    │─────▶│    SOL      │─────▶│   SPRINT    │
+                     │  NNNN    │      │   NNNN      │      │     NN      │
+                     └────┬─────┘      └─────────────┘      └──────┬──────┘
+                          │                                        │
+                          │            ┌─────────────┐             │
+                          └───────────▶│    RISK     │◀────────────┘
+                          │            │   NNNN      │             │
+                          │            └─────────────┘             │
+                          │                                        │
+                          │            ┌─────────────┐             │
+                          └───────────▶│     CR      │─────────────┘
+                                       │   NNNN      │
+                                       └─────────────┘
+                                                │
+                                                ▼
+                                       ┌─────────────┐      ┌─────────────┐
+                                       │    REL      │─────▶│    INC      │
+                                       │   NNNN      │      │   NNNN      │
+                                       └─────────────┘      └─────────────┘
+</code></pre>
+<h3>Traceability</h3>
+<p>Every entity can be traced through the system:</p>
+<ul>
+<li><strong>Vision</strong> sets goals and success criteria for the product</li>
+<li><strong>Product Spec</strong> defines capabilities (CAP-NN) that drive requirements</li>
+<li><strong>Requirements</strong> trace to capabilities, solutions, sprints, tests, and releases</li>
+<li><strong>Risks</strong> link to affected requirements and solutions</li>
+<li><strong>Change requests</strong> modify requirements and impact sprints</li>
+<li><strong>Incidents</strong> link back to releases and spawn action items</li>
+</ul>
+<hr>
+<h2>Project Lifecycle</h2>
+<p>A project flows through these phases:</p>
+<pre><code>
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│                              PROJECT LIFECYCLE                                     │
+├───────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                   │
+│  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌────┐│
+│  │  INIT    │──▶│  VISION  │──▶│ PLANNING │──▶│ SPRINTS  │──▶│ RELEASE  │──▶│OPS ││
+│  │          │   │  &amp; SPEC  │   │          │   │          │   │          │   │    ││
+│  └──────────┘   └──────────┘   └──────────┘   └──────────┘   └──────────┘   └────┘│
+│       │              │              │              │              │           │   │
+│       ▼              ▼              ▼              ▼              ▼           ▼   │
+│   Initialize     Define         Capture       Execute        Deploy      Monitor │
+│   project        vision and     requirements  work in        to          and     │
+│   structure      product spec   and plan      iterations     production  maintain│
+│                                                                                   │
+└───────────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<p>Each phase uses specific commands, agents, and templates.</p>
+<hr>
+<h2>Phase 1: Project Initialization</h2>
+<h3>Purpose</h3>
+<p>Set up the project structure and establish the foundation for all project management activities.</p>
+<h3>Steps</h3>
+<h4>1.1 Initialize Project Structure</h4>
+<p><strong>Command</strong>: <code>~/.claude/claude-init.sh /path/to/project</code></p>
+<p>This creates:</p>
+<pre><code>
+.claude/
+├── agents/                      # Symlinks to global agents
+├── commands/                    # Symlinks to global commands
+├── hooks/                       # Symlinks to global hooks
+├── skills/
+├── journal/
+│   ├── decisions/
+│   ├── features/
+│   ├── lessons/
+│   ├── sessions/
+│   └── templates/               # Symlinks to journal templates
+├── requirements/
+│   ├── requirements/
+│   ├── solutions/
+│   ├── templates/               # Symlinks to requirement templates
+│   ├── README.md
+│   └── REQUIREMENTS-INDEX.md
+├── project-management/
+│   ├── risks/
+│   ├── sprints/
+│   ├── releases/
+│   ├── changes/
+│   ├── incidents/
+│   ├── status/
+│   ├── templates/               # Symlinks to PM templates
+│   ├── backlog.md
+│   ├── traceability-matrix.md
+│   └── definition-of-done.md
+└── settings.json
+</code></pre>
+<h4>1.2 Select Domain Agents</h4>
+<p>During initialization, select relevant agents:</p>
+<pre><code>
+Available domain experts:
+  1) drupal-expert       - Drupal CMS development
+  2) cloudflare-expert   - Cloudflare Workers, Pages, D1, R2
+  ...
+
+Project management agents:
+  12) risk-manager       - Risk identification and mitigation
+  13) project-manager    - Planning, tracking, coordination
+  14) release-engineer   - Deployment and incident response
+  15) qa-strategist      - Test strategy and quality
+  16) stakeholder-liaison - Communication and relationships
+</code></pre>
+<p><strong>Recommendation</strong>: For serious projects, include at least <code>risk-manager</code> (12) and <code>project-manager</code> (13).</p>
+<h4>1.3 Create Project CLAUDE.md</h4>
+<p>Create a <code>CLAUDE.md</code> file in the project root with:</p>
+<ul>
+<li>Project overview and goals</li>
+<li>Tech stack and architecture</li>
+<li>Team and stakeholder information</li>
+<li>Project-specific conventions</li>
+</ul>
+<h4>1.4 Customize Definition of Done</h4>
+<p>Edit <code>.claude/project-management/definition-of-done.md</code> to match your project's quality standards.</p>
+<h4>1.5 Set Up Stakeholder Communication</h4>
+<p><strong>Command</strong>: Create stakeholder plan manually or use the template</p>
+<p><strong>Template</strong>: <code>stakeholder-plan.md</code></p>
+<p>Document:</p>
+<ul>
+<li>Who the stakeholders are</li>
+<li>Their interests and influence</li>
+<li>Communication preferences</li>
+<li>RACI matrix for key activities</li>
+</ul>
+<p><strong>Agent</strong>: Use <code>stakeholder-liaison</code> agent to help design communication strategy.</p>
+<h3>Hooks Active in This Phase</h3>
+<table class="md-table"><thead><tr><th>Hook</th><th>Trigger</th><th>Effect</th></tr></thead><tbody><tr><td><code>check-branch.sh</code></td><td>Edit, Write</td><td>Prevents changes on main branch</td></tr></tbody></table>
+<h3>Deliverables</h3>
+<ul>
+<li>[ ] Project structure initialized</li>
+<li>[ ] Relevant agents selected and linked</li>
+<li>[ ] CLAUDE.md created</li>
+<li>[ ] Definition of Done customized</li>
+<li>[ ] Stakeholder plan created (if needed)</li>
+</ul>
+<hr>
+<h2>Phase 1.5: Vision & Product Specification</h2>
+<h3>Purpose</h3>
+<p>Define why you're building this product and what it will do at a high level. This creates the foundation that drives all requirements.</p>
+<h3>The Flow</h3>
+<pre><code>
+Vision (optional) ──► Product Spec (required) ──► Requirements
+     │                      │                         │
+     └── WHY               └── WHAT                  └── HOW MUCH
+         Goals                  Capabilities (CAP-NN)     Acceptance Criteria
+         Success Criteria       NFRs                      Scope
+         Scope Boundaries       Constraints               Dependencies
+</code></pre>
+<h3>Steps</h3>
+<h4>1.5.1 Create Project Vision (Optional but Recommended)</h4>
+<p><strong>Command</strong>: <code>/spec vision</code></p>
+<p>The vision document answers fundamental questions:</p>
+<ol>
+<li><strong>What problem are we solving?</strong> - The pain point or opportunity</li>
+<li><strong>Who is affected?</strong> - Target users and stakeholders</li>
+<li><strong>What does success look like?</strong> - Measurable goals</li>
+<li><strong>What's in scope?</strong> - Boundaries of the project</li>
+</ol>
+<p>Claude guides you through creating a vision document with:</p>
+<ul>
+<li>Executive summary (elevator pitch)</li>
+<li>Problem statement and pain points</li>
+<li>Vision statement and key goals</li>
+<li>Value proposition for each stakeholder</li>
+<li>Success criteria (must achieve, should achieve, could achieve)</li>
+<li>Scope boundaries</li>
+</ul>
+<p><strong>File</strong>: <code>.claude/project-management/vision.md</code></p>
+<p><strong>Template</strong>: <code>vision.md</code></p>
+<h4>1.5.2 Create Product Specification (Required)</h4>
+<p><strong>Command</strong>: <code>/spec create</code></p>
+<p>The product specification is the <strong>required foundation</strong> for all requirements. It defines:</p>
+<ol>
+<li><strong>Product Overview</strong> - What this is and why it exists</li>
+<li><strong>Users and Stakeholders</strong> - Who we're building for</li>
+<li><strong>Capabilities (CAP-NN)</strong> - What the product must do</li>
+<li><strong>Non-Functional Requirements</strong> - Performance, security, accessibility</li>
+<li><strong>Constraints</strong> - Technical, business, regulatory limits</li>
+<li><strong>Dependencies</strong> - External and internal dependencies</li>
+<li><strong>Scope</strong> - What's in and out</li>
+</ol>
+<p>Claude guides you through each section, asking clarifying questions.</p>
+<p><strong>Key Concept: Capabilities</strong></p>
+<p>Capabilities are high-level functions the product must perform. Each capability gets an ID (CAP-01, CAP-02, etc.) and drives the creation of detailed requirements.</p>
+<p>Example capabilities:</p>
+<pre><code>
+| ID     | Capability           | Priority    | Status   |
+|--------|---------------------|-------------|----------|
+| CAP-01 | User Authentication | Must Have   | Proposed |
+| CAP-02 | API Design          | Must Have   | Proposed |
+| CAP-03 | Reporting           | Should Have | Proposed |
+</code></pre>
+<p><strong>File</strong>: <code>.claude/project-management/product-spec.md</code></p>
+<p><strong>Template</strong>: <code>product-spec.md</code></p>
+<h4>1.5.3 Approve the Specification</h4>
+<p><strong>Command</strong>: <code>/spec approve</code></p>
+<p>Before creating requirements, the specification should be approved. This ensures:</p>
+<ul>
+<li>[ ] All sections complete</li>
+<li>[ ] Open questions resolved</li>
+<li>[ ] Stakeholders aligned</li>
+<li>[ ] Scope clearly defined</li>
+<li>[ ] Success metrics agreed</li>
+</ul>
+<p><strong>Status Changes</strong>:</p>
+<ul>
+<li><code>draft</code> → <code>review</code> → <code>approved</code></li>
+</ul>
+<h4>1.5.4 View Capabilities</h4>
+<p><strong>Command</strong>: <code>/spec capabilities</code></p>
+<p>Lists all capabilities and their linked requirements:</p>
+<pre><code>
+ID      | Capability           | Priority    | Requirements
+--------|---------------------|-------------|---------------
+CAP-01  | User Authentication | Must Have   | REQ-0001, REQ-0002
+CAP-02  | API Design          | Must Have   | REQ-0003
+CAP-03  | Reporting           | Should Have | (none yet)
+</code></pre>
+<p>Highlights capabilities that need requirements created.</p>
+<h3>When to Skip Vision</h3>
+<p>You can skip the vision document for:</p>
+<ul>
+<li>Small, well-defined projects</li>
+<li>Single-feature additions to existing products</li>
+<li>Technical debt / refactoring efforts</li>
+</ul>
+<p>The product specification is <strong>always required</strong> as the foundation for requirements.</p>
+<h3>Deliverables</h3>
+<ul>
+<li>[ ] Vision document created (optional)</li>
+<li>[ ] Product specification created</li>
+<li>[ ] Specification approved</li>
+<li>[ ] Capabilities identified with priorities</li>
+</ul>
+<hr>
+<h2>Phase 2: Requirements & Planning</h2>
+<h3>Purpose</h3>
+<p>Capture detailed requirements from the product specification, identify risks, and create the product backlog.</p>
+<h3>Requirement Lifecycle</h3>
+<p>Requirements flow through these states:</p>
+<pre><code>
+candidate ──► approved ──► draft ──► active ──► implemented ──► completed
+    │             │
+    └── rejected  └── deprecated
+</code></pre>
+<table class="md-table"><thead><tr><th>Status</th><th>Meaning</th></tr></thead><tbody><tr><td><code>candidate</code></td><td>Proposed but NOT approved for implementation</td></tr><tr><td><code>approved</code></td><td>Approved for inclusion, needs detailed specification</td></tr><tr><td><code>draft</code></td><td>Being specified with acceptance criteria</td></tr><tr><td><code>active</code></td><td>Ready to work on, fully specified</td></tr><tr><td><code>implemented</code></td><td>Code complete, awaiting verification</td></tr><tr><td><code>completed</code></td><td>All acceptance criteria verified</td></tr><tr><td><code>rejected</code></td><td>Not approved for inclusion (document reason)</td></tr><tr><td><code>deprecated</code></td><td>Was approved but no longer relevant</td></tr></tbody></table>
+<h3>Steps</h3>
+<h4>2.1 Propose Requirements from Capabilities</h4>
+<p><strong>Command</strong>: <code>/requirement propose</code></p>
+<p>For each capability in the product specification, propose one or more requirements:</p>
+<ol>
+<li>Link to capability (CAP-NN)</li>
+<li>Describe what needs to be built</li>
+<li>Set initial priority (must-have, should-have, could-have, won't-have)</li>
+<li>Status is set to <code>candidate</code></li>
+</ol>
+<p><strong>Example Workflow</strong>:</p>
+<pre><code>
+User: /requirement propose
+Claude: Which capability does this requirement address? (e.g., CAP-01)
+User: CAP-01 User Authentication
+Claude: What aspect of user authentication?
+User: Login with email and password
+Claude: [Creates REQ-0001-login as candidate]
+Claude: Requirement REQ-0001 created as CANDIDATE. Use /requirement approve REQ-0001 to approve.
+</code></pre>
+<h4>2.2 Approve Requirements</h4>
+<p><strong>Command</strong>: <code>/requirement approve &lt;REQ-NNNN&gt;</code></p>
+<p>Review candidate requirements and approve for implementation:</p>
+<pre><code>
+User: /requirement approve REQ-0001
+Claude: Any conditions or notes for approval?
+User: Ensure we support Remember Me functionality
+Claude: [Updates REQ-0001 to approved status with conditions]
+</code></pre>
+<p><strong>Command</strong>: <code>/requirement reject &lt;REQ-NNNN&gt;</code></p>
+<p>If a requirement shouldn't proceed:</p>
+<pre><code>
+User: /requirement reject REQ-0005
+Claude: Reason for rejection?
+User: Deferred to phase 2
+Claude: [Updates REQ-0005 to rejected status with reason]
+</code></pre>
+<h4>2.3 Specify Requirements in Detail</h4>
+<p><strong>Command</strong>: <code>/requirement create &lt;REQ-NNNN&gt;</code> or <code>/requirement create</code></p>
+<p>For approved requirements, add detailed specification:</p>
+<ol>
+<li>Claude asks clarifying questions</li>
+<li>Generates detailed content:</li>
+</ol>
+<ul>
+<li>Summary and rationale</li>
+<li>User story (As a... I want... So that...)</li>
+<li>Acceptance criteria (AC-01, AC-02, etc.) - at least 3</li>
+<li>Scope (in/out)</li>
+<li>Dependencies</li>
+<li>Non-functional requirements</li>
+</ul>
+<ol>
+<li>Status moves to <code>draft</code> or <code>active</code> based on completeness</li>
+</ol>
+<p><strong>Agent</strong>: Use <code>requirements-analyst</code> for help capturing complete, testable requirements.</p>
+<p><strong>Template</strong>: <code>requirement.md</code></p>
+<p><strong>File</strong>: <code>.claude/requirements/requirements/REQ-NNNN-{slug}.md</code></p>
+<h4>2.2 Design Solutions</h4>
+<p><strong>Command</strong>: <code>/solution create</code></p>
+<p>For each requirement (or group of related requirements):</p>
+<ol>
+<li>Link to the requirement(s) being addressed</li>
+<li>Describe the proposed approach</li>
+<li>Document trade-offs and alternatives considered</li>
+<li>Get solution accepted before implementation</li>
+</ol>
+<p><strong>Agent</strong>: Use <code>solution-architect</code> for help designing solutions with proper trade-off analysis.</p>
+<p><strong>Template</strong>: <code>solution.md</code></p>
+<h4>2.3 Identify Risks</h4>
+<p><strong>Command</strong>: <code>/risk create</code></p>
+<p>For each identified risk:</p>
+<ol>
+<li>Describe the risk and its potential impact</li>
+<li>Assess probability (high/medium/low) and impact (critical/high/medium/low)</li>
+<li>Define mitigation strategies (prevention + contingency)</li>
+<li>Assign owner and review schedule</li>
+</ol>
+<p><strong>Command</strong>: <code>/risk assess</code></p>
+<p>Run a risk identification session to systematically identify risks across categories:</p>
+<ul>
+<li>Technical risks</li>
+<li>Schedule risks</li>
+<li>Resource risks</li>
+<li>External risks</li>
+<li>Scope risks</li>
+<li>Quality risks</li>
+</ul>
+<p><strong>Command</strong>: <code>/risk matrix</code></p>
+<p>Visualize all active risks in a probability/impact matrix:</p>
+<pre><code>
+                 IMPACT
+          Low    Med    High   Crit
+     ┌──────┬──────┬──────┬──────┐
+High │      │      │ R-03 │ R-01 │
+P    ├──────┼──────┼──────┼──────┤
+R Med│      │ R-05 │ R-02 │      │
+O    ├──────┼──────┼──────┼──────┤
+B Low│ R-07 │ R-06 │ R-04 │      │
+     └──────┴──────┴──────┴──────┘
+</code></pre>
+<p><strong>Agent</strong>: Use <code>risk-manager</code> for help identifying and assessing risks.</p>
+<p><strong>Template</strong>: <code>risk-register.md</code></p>
+<h4>2.4 Build the Backlog</h4>
+<p><strong>Command</strong>: <code>/backlog add</code></p>
+<p>Add items to the product backlog with:</p>
+<ul>
+<li>Description</li>
+<li>Priority (must-have, should-have, could-have, won't-have)</li>
+<li>Size estimate (XS, S, M, L, XL or story points)</li>
+<li>Link to requirement (REQ-NNNN)</li>
+</ul>
+<p><strong>Command</strong>: <code>/backlog list</code></p>
+<p>View the backlog organized by priority.</p>
+<p><strong>Command</strong>: <code>/backlog prioritize</code></p>
+<p>Reorder items based on business value, dependencies, and risk.</p>
+<p><strong>Command</strong>: <code>/backlog groom</code></p>
+<p>Run a grooming session to:</p>
+<ul>
+<li>Review and reprioritize top items</li>
+<li>Estimate unestimated items</li>
+<li>Check readiness (clear acceptance criteria, dependencies identified)</li>
+<li>Add new items</li>
+</ul>
+<p><strong>File</strong>: <code>.claude/project-management/backlog.md</code></p>
+<h4>2.5 Update Traceability Matrix</h4>
+<p><strong>File</strong>: <code>.claude/project-management/traceability-matrix.md</code></p>
+<p>As requirements and solutions are created, update the RTM to show:</p>
+<ul>
+<li>Which requirements have solutions</li>
+<li>Which requirements are in sprints</li>
+<li>Test coverage status</li>
+<li>Release mapping</li>
+</ul>
+<h3>Hooks Active in This Phase</h3>
+<table class="md-table"><thead><tr><th>Hook</th><th>Trigger</th><th>Effect</th></tr></thead><tbody><tr><td><code>requirements-sync-reminder.sh</code></td><td>Edit, Write</td><td>Reminds to update REQUIREMENTS-INDEX.md</td></tr></tbody></table>
+<h3>Deliverables</h3>
+<ul>
+<li>[ ] All requirements captured with acceptance criteria</li>
+<li>[ ] Solutions designed for each requirement</li>
+<li>[ ] Initial risks identified and documented</li>
+<li>[ ] Product backlog created and prioritized</li>
+<li>[ ] Traceability matrix started</li>
+</ul>
+<hr>
+<h2>Phase 3: Sprint Execution</h2>
+<h3>Purpose</h3>
+<p>Execute work in time-boxed iterations with clear goals and tracking.</p>
+<h3>Steps</h3>
+<h4>3.1 Start a Sprint</h4>
+<p><strong>Command</strong>: <code>/sprint start</code></p>
+<p>Claude guides you through:</p>
+<ol>
+<li><strong>Sprint number</strong>: Auto-incremented from existing sprints</li>
+<li><strong>Sprint name</strong>: Descriptive theme (e.g., "User Authentication")</li>
+<li><strong>Duration</strong>: Default 2 weeks</li>
+<li><strong>Sprint goal</strong>: 1-2 sentences describing success</li>
+<li><strong>Capacity</strong>: Available days/hours</li>
+<li><strong>Backlog selection</strong>: Choose items from backlog (recommend 80% capacity)</li>
+</ol>
+<p>Creates <code>SPRINT-NN.md</code> with:</p>
+<ul>
+<li>Sprint metadata</li>
+<li>Committed items</li>
+<li>Daily progress section</li>
+<li>Metrics section</li>
+<li>Retrospective section</li>
+</ul>
+<p><strong>Agent</strong>: Use <code>project-manager</code> for help with sprint planning.</p>
+<p><strong>Template</strong>: <code>sprint.md</code></p>
+<h4>3.2 Daily Standups</h4>
+<p><strong>Command</strong>: <code>/standup</code> or <code>/standup quick</code></p>
+<p>Generates a quick status update:</p>
+<pre><code>
+📍 Standup - 2026-01-21
+
+✅ Yesterday:
+- Completed login form implementation
+- Made progress on password validation (70%)
+
+🎯 Today:
+- Continue password validation
+- Start session management
+
+🚧 Blockers:
+- None
+
+Sprint: 12/20 points | Day 5 of 10
+</code></pre>
+<p><strong>Command</strong>: <code>/standup detailed</code></p>
+<p>More comprehensive update with accomplishments, focus areas, upcoming work, blockers, and notes.</p>
+<p><strong>Command</strong>: <code>/standup yesterday</code></p>
+<p>Review mode - what was accomplished yesterday based on git log and sprint updates.</p>
+<h4>3.3 Track Progress</h4>
+<p><strong>Command</strong>: <code>/sprint status</code></p>
+<p>Shows current sprint progress:</p>
+<ul>
+<li>Days elapsed/remaining</li>
+<li>Points completed/committed</li>
+<li>Burndown status (ahead/on-track/behind)</li>
+<li>Completed items</li>
+<li>In-progress items</li>
+<li>Todo items</li>
+<li>Blockers</li>
+</ul>
+<p><strong>Command</strong>: <code>/sprint add &lt;item&gt;</code></p>
+<p>Add an item to the current sprint (carefully - watch capacity).</p>
+<p><strong>Command</strong>: <code>/sprint complete &lt;item&gt;</code></p>
+<p>Mark an item as done in the current sprint.</p>
+<h4>3.4 Handle Changes</h4>
+<p><strong>Command</strong>: <code>/change create</code></p>
+<p>When scope needs to change mid-sprint:</p>
+<ol>
+<li>Document the change request</li>
+<li>Analyze impact (scope, schedule, effort, cost)</li>
+<li>Consider alternatives</li>
+<li>Get approval</li>
+<li>Update sprint if approved</li>
+</ol>
+<p><strong>Agent</strong>: Use <code>project-manager</code> for impact analysis.</p>
+<p><strong>Template</strong>: <code>change-request.md</code></p>
+<h4>3.5 Manage Blockers</h4>
+<p>When blocked:</p>
+<ol>
+<li>Document in sprint file under "Blockers & Risks"</li>
+<li>Escalate if needed (see stakeholder communication plan)</li>
+<li>Create risk if blocker indicates a pattern</li>
+</ol>
+<p><strong>Agent</strong>: Use <code>stakeholder-liaison</code> for help with escalation communication.</p>
+<h4>3.6 Sprint Review</h4>
+<p><strong>Command</strong>: <code>/sprint review</code></p>
+<p>At the end of the sprint:</p>
+<ol>
+<li><strong>What Was Delivered</strong>: List completed items with demo notes</li>
+<li><strong>Incomplete Items</strong>: Document what wasn't finished and why</li>
+<li><strong>Metrics</strong>: Calculate velocity and completion rate</li>
+<li><strong>Stakeholder Feedback</strong>: Capture feedback from demo</li>
+</ol>
+<h4>3.7 Sprint Retrospective</h4>
+<p><strong>Command</strong>: <code>/retrospective</code> or <code>/retrospective standard</code></p>
+<p>Classic format:</p>
+<ul>
+<li>What went well</li>
+<li>What could improve</li>
+<li>Action items</li>
+</ul>
+<p><strong>Command</strong>: <code>/retrospective start-stop-continue</code></p>
+<p>Behavior-focused format:</p>
+<ul>
+<li>Start doing (new practices)</li>
+<li>Stop doing (waste elimination)</li>
+<li>Continue doing (preserve what works)</li>
+</ul>
+<p><strong>Command</strong>: <code>/retrospective 4ls</code></p>
+<p>Emotional/learning format:</p>
+<ul>
+<li>Liked (enjoyable aspects)</li>
+<li>Learned (new knowledge)</li>
+<li>Lacked (missing elements)</li>
+<li>Longed for (wishes)</li>
+</ul>
+<p><strong>Agent</strong>: Use <code>project-manager</code> to facilitate retrospectives.</p>
+<h3>Hooks Active in This Phase</h3>
+<table class="md-table"><thead><tr><th>Hook</th><th>Trigger</th><th>Effect</th></tr></thead><tbody><tr><td><code>check-branch.sh</code></td><td>Edit, Write</td><td>Prevents changes on main branch</td></tr><tr><td><code>validate-commit-message.sh</code></td><td>git commit</td><td>Enforces conventional commits</td></tr><tr><td><code>requirements-sync-reminder.sh</code></td><td>Edit, Write</td><td>Reminds to update index</td></tr><tr><td><code>sprint-completion-check.sh</code></td><td>Stop</td><td>Reminds about sprint review when sprint ended</td></tr><tr><td><code>risk-review-reminder.sh</code></td><td>Stop</td><td>Reminds about stale risks (2+ weeks)</td></tr></tbody></table>
+<h3>Deliverables (per sprint)</h3>
+<ul>
+<li>[ ] Sprint plan with committed items</li>
+<li>[ ] Daily standups tracked</li>
+<li>[ ] Sprint review completed</li>
+<li>[ ] Retrospective completed with action items</li>
+<li>[ ] Velocity recorded for future planning</li>
+</ul>
+<hr>
+<h2>Phase 4: Release Management</h2>
+<h3>Purpose</h3>
+<p>Package completed work and deploy to production safely.</p>
+<h3>Steps</h3>
+<h4>4.1 Plan a Release</h4>
+<p><strong>Command</strong>: <code>/release plan</code></p>
+<p>Define what's going into this release:</p>
+<ol>
+<li><strong>Version</strong>: Following semver (major.minor.patch)</li>
+<li><strong>Release type</strong>: major/minor/patch/hotfix</li>
+<li><strong>Target date</strong></li>
+<li><strong>Included sprints</strong>: Which sprints are included</li>
+<li><strong>Requirements delivered</strong>: List of completed requirements</li>
+<li><strong>Breaking changes</strong>: Document any breaking changes</li>
+</ol>
+<p>Creates <code>REL-{version}.md</code> in <code>.claude/project-management/releases/</code></p>
+<p><strong>Agent</strong>: Use <code>release-engineer</code> for release planning.</p>
+<p><strong>Template</strong>: <code>release-notes.md</code></p>
+<h4>4.2 Prepare for Release</h4>
+<p><strong>Command</strong>: <code>/release prepare</code></p>
+<p>Verification checklist:</p>
+<ul>
+<li>[ ] All planned items completed</li>
+<li>[ ] Tests passing</li>
+<li>[ ] Documentation updated</li>
+<li>[ ] Breaking changes documented</li>
+<li>[ ] Rollback plan ready</li>
+</ul>
+<p>Generate release notes covering:</p>
+<ul>
+<li>Features (from requirements)</li>
+<li>Improvements</li>
+<li>Bug fixes</li>
+<li>Breaking changes</li>
+<li>Known issues</li>
+</ul>
+<h4>4.3 Create Deployment Checklist</h4>
+<p><strong>Command</strong>: <code>/release checklist</code></p>
+<p>Creates <code>DEPLOY-REL-{version}.md</code> with comprehensive checklist:</p>
+<p><strong>Pre-Deployment (Day Before)</strong>:</p>
+<ul>
+<li>Code readiness</li>
+<li>Build verification</li>
+<li>Staging verification</li>
+<li>Documentation</li>
+<li>Communication</li>
+<li>Rollback preparation</li>
+</ul>
+<p><strong>Deployment Day</strong>:</p>
+<ul>
+<li>Pre-deployment checks</li>
+<li>Go/No-go decision</li>
+<li>Deployment steps</li>
+<li>Post-deployment monitoring</li>
+</ul>
+<p><strong>Template</strong>: <code>deployment-checklist.md</code></p>
+<p><strong>Agent</strong>: Use <code>release-engineer</code> for deployment planning.</p>
+<h4>4.4 Deploy</h4>
+<p><strong>Command</strong>: <code>/release deploy</code></p>
+<p>Interactive deployment guide:</p>
+<ol>
+<li>Verify all pre-deployment checks passed</li>
+<li>Confirm go/no-go decision</li>
+<li>Walk through deployment steps</li>
+<li>Run smoke tests</li>
+<li>Monitor for issues</li>
+<li>Update release status</li>
+</ol>
+<h4>4.5 Rollback (if needed)</h4>
+<p><strong>Command</strong>: <code>/release rollback</code></p>
+<p>If issues are detected:</p>
+<ol>
+<li>Confirm rollback decision</li>
+<li>Execute rollback steps from checklist</li>
+<li>Verify rollback success</li>
+<li>Update release status to "rolled-back"</li>
+<li>Create incident postmortem</li>
+</ol>
+<p><strong>Trigger conditions for rollback</strong>:</p>
+<ul>
+<li>Error rate exceeds threshold</li>
+<li>Critical functionality broken</li>
+<li>Performance significantly degraded</li>
+<li>Security vulnerability discovered</li>
+</ul>
+<h3>Hooks Active in This Phase</h3>
+<table class="md-table"><thead><tr><th>Hook</th><th>Trigger</th><th>Effect</th></tr></thead><tbody><tr><td><code>pre-release-checklist.sh</code></td><td>Bash (deploy/release)</td><td>Warns if checklist incomplete</td></tr></tbody></table>
+<h3>Deliverables</h3>
+<ul>
+<li>[ ] Release plan created</li>
+<li>[ ] Release notes generated</li>
+<li>[ ] Deployment checklist completed</li>
+<li>[ ] Successful deployment (or rollback)</li>
+<li>[ ] Post-deployment verification passed</li>
+</ul>
+<hr>
+<h2>Phase 5: Operations & Maintenance</h2>
+<h3>Purpose</h3>
+<p>Monitor production, handle incidents, and maintain the system.</p>
+<h3>Steps</h3>
+<h4>5.1 Status Reporting</h4>
+<p><strong>Command</strong>: <code>/status quick</code></p>
+<p>Fast status snapshot for standups or quick check-ins.</p>
+<p><strong>Command</strong>: <code>/status weekly</code></p>
+<p>Comprehensive weekly report including:</p>
+<ul>
+<li>Executive summary with health indicator</li>
+<li>Accomplishments</li>
+<li>In progress</li>
+<li>Planned next week</li>
+<li>Blockers and risks</li>
+<li>Sprint progress</li>
+<li>Release status</li>
+</ul>
+<p><strong>Command</strong>: <code>/status monthly</code></p>
+<p>Monthly summary with trends and metrics.</p>
+<p><strong>Agent</strong>: Use <code>project-manager</code> for status report preparation.</p>
+<p><strong>Template</strong>: <code>status-report.md</code></p>
+<h4>5.2 Incident Response</h4>
+<p>When an incident occurs:</p>
+<p><strong>Immediate Response</strong>:</p>
+<ol>
+<li>Assess severity (S1-Critical to S4-Minor)</li>
+<li>Assemble response team</li>
+<li>Investigate and mitigate</li>
+<li>Communicate status to stakeholders</li>
+</ol>
+<p><strong>Post-Incident</strong>:</p>
+<ol>
+<li>Document timeline</li>
+<li>Conduct root cause analysis (5 Whys)</li>
+<li>Create action items</li>
+<li>Update risks if patterns emerge</li>
+</ol>
+<p><strong>Template</strong>: <code>incident-postmortem.md</code></p>
+<p><strong>Agent</strong>: Use <code>release-engineer</code> for incident response and postmortem facilitation.</p>
+<h4>5.3 Risk Management</h4>
+<p><strong>Command</strong>: <code>/risk list</code></p>
+<p>Review active risks regularly (at least bi-weekly).</p>
+<p><strong>Command</strong>: <code>/risk update &lt;RISK-NNNN&gt;</code></p>
+<p>Update risk status, reassess probability/impact, track mitigation progress.</p>
+<p><strong>Command</strong>: <code>/risk matrix</code></p>
+<p>Visualize current risk landscape.</p>
+<p><strong>Hook</strong>: <code>risk-review-reminder.sh</code> fires at session end if risks haven't been reviewed in 2+ weeks.</p>
+<h4>5.4 Change Control</h4>
+<p><strong>Command</strong>: <code>/change list</code></p>
+<p>Review pending change requests.</p>
+<p><strong>Command</strong>: <code>/change approve &lt;CR-NNNN&gt;</code> or <code>/change reject &lt;CR-NNNN&gt;</code></p>
+<p>Record approval decisions.</p>
+<p><strong>Command</strong>: <code>/change implement &lt;CR-NNNN&gt;</code></p>
+<p>Track implementation of approved changes.</p>
+<h4>5.5 Quality Assurance</h4>
+<p>Review Definition of Done periodically:</p>
+<ul>
+<li>Are quality gates being met?</li>
+<li>Should criteria be added or adjusted?</li>
+<li>Are escaped defects indicating gaps?</li>
+</ul>
+<p><strong>Agent</strong>: Use <code>qa-strategist</code> for quality process improvements.</p>
+<h3>Hooks Active in This Phase</h3>
+<table class="md-table"><thead><tr><th>Hook</th><th>Trigger</th><th>Effect</th></tr></thead><tbody><tr><td><code>risk-review-reminder.sh</code></td><td>Stop</td><td>Reminds about stale risks</td></tr><tr><td><code>session-summary-reminder.sh</code></td><td>Stop</td><td>Prompts for session documentation</td></tr></tbody></table>
+<h3>Ongoing Deliverables</h3>
+<ul>
+<li>[ ] Weekly status reports</li>
+<li>[ ] Incident postmortems (as needed)</li>
+<li>[ ] Risk register updated</li>
+<li>[ ] Change requests processed</li>
+<li>[ ] Quality metrics tracked</li>
+</ul>
+<hr>
+<h2>Command Reference</h2>
+<h3>Core Workflow Commands</h3>
+<table class="md-table"><thead><tr><th>Command</th><th>Actions</th><th>Description</th></tr></thead><tbody><tr><td><code>/start-work</code></td><td>-</td><td>Start a new feature branch with proper naming</td></tr><tr><td><code>/session-summary</code></td><td>-</td><td>Document what was accomplished in a session</td></tr><tr><td><code>/journal</code></td><td>decision, lesson, session, feature</td><td>Create journal entries</td></tr><tr><td><code>/spec</code></td><td>vision, create, view, update, approve, capabilities</td><td>Manage vision and product spec</td></tr><tr><td><code>/requirement</code></td><td>propose, approve, reject, create, list, view, update-ac, sync, validate</td><td>Manage requirements lifecycle</td></tr><tr><td><code>/solution</code></td><td>create, list, compare</td><td>Manage solution proposals</td></tr></tbody></table>
+<h3>Project Management Commands</h3>
+<table class="md-table"><thead><tr><th>Command</th><th>Actions</th><th>Description</th></tr></thead><tbody><tr><td><code>/risk</code></td><td>create, list, view, update, assess, matrix</td><td>Risk management lifecycle</td></tr><tr><td><code>/sprint</code></td><td>start, status, add, complete, review</td><td>Sprint planning and execution</td></tr><tr><td><code>/status</code></td><td>quick, weekly, monthly</td><td>Project health reporting</td></tr><tr><td><code>/release</code></td><td>plan, prepare, checklist, notes, deploy, rollback</td><td>Release lifecycle</td></tr><tr><td><code>/change</code></td><td>create, list, view, approve, reject, implement</td><td>Change control</td></tr><tr><td><code>/backlog</code></td><td>add, list, prioritize, groom, move</td><td>Product backlog management</td></tr><tr><td><code>/standup</code></td><td>quick, detailed, yesterday</td><td>Daily progress tracking</td></tr><tr><td><code>/retrospective</code></td><td>standard, start-stop-continue, 4ls</td><td>Sprint retrospectives</td></tr></tbody></table>
+<h3>Command Quick Reference</h3>
+<pre><code>
+# Project foundation
+/spec vision                    # Create project vision (optional)
+/spec create                    # Create product specification (required)
+/spec approve                   # Approve specification
+/spec capabilities              # View capabilities and linked requirements
+
+# Requirements
+/requirement propose            # Propose candidate requirement
+/requirement approve REQ-0001   # Approve for implementation
+/requirement create REQ-0001    # Add detailed specification
+/solution create                # Design solution approach
+
+# Daily execution
+/standup                        # Quick daily update
+/sprint status                  # Check sprint progress
+/sprint complete &lt;item&gt;         # Mark item done
+
+# Sprint lifecycle
+/sprint start                   # Begin new sprint
+/backlog groom                  # Prepare backlog
+/sprint review                  # End-of-sprint review
+/retrospective                  # Team retrospective
+
+# Release lifecycle
+/release plan                   # Plan new release
+/release prepare                # Ready for deployment
+/release checklist              # Deployment verification
+/release deploy                 # Execute deployment
+
+# Risk and change
+/risk create                    # Log new risk
+/risk matrix                    # View risk landscape
+/change create                  # Request a change
+
+# Reporting
+/status quick                   # Snapshot status
+/status weekly                  # Weekly report
+/journal decision &lt;name&gt;        # Record decision
+</code></pre>
+<hr>
+<h2>Agent Reference</h2>
+<h3>Workflow Agents</h3>
+<table class="md-table"><thead><tr><th>Agent</th><th>When to Use</th><th>Key Capabilities</th></tr></thead><tbody><tr><td><code>requirements-analyst</code></td><td>Capturing requirements</td><td>Asks clarifying questions, ensures testable criteria</td></tr><tr><td><code>solution-architect</code></td><td>Designing solutions</td><td>Trade-off analysis, alternative evaluation</td></tr><tr><td><code>project-historian</code></td><td>Understanding past decisions</td><td>Synthesizes history, finds relevant context</td></tr><tr><td><code>lessons-extractor</code></td><td>Documenting learnings</td><td>Structures insights, identifies patterns</td></tr></tbody></table>
+<h3>Project Management Agents</h3>
+<table class="md-table"><thead><tr><th>Agent</th><th>When to Use</th><th>Key Capabilities</th></tr></thead><tbody><tr><td><code>risk-manager</code></td><td>Risk identification and mitigation</td><td>Systematic risk analysis, mitigation strategies</td></tr><tr><td><code>project-manager</code></td><td>Planning, tracking, reporting</td><td>Sprint planning, status reports, metrics</td></tr><tr><td><code>release-engineer</code></td><td>Deployments and incidents</td><td>Deployment procedures, rollback plans, postmortems</td></tr><tr><td><code>qa-strategist</code></td><td>Quality and testing</td><td>Test strategy, DoD definition, defect analysis</td></tr><tr><td><code>stakeholder-liaison</code></td><td>Communication challenges</td><td>Expectation management, difficult conversations</td></tr></tbody></table>
+<h3>When to Invoke Agents</h3>
+<p><strong>Risk Manager</strong> - Invoke when:</p>
+<ul>
+<li>Starting a new project phase</li>
+<li>Encountering unexpected problems</li>
+<li>Before major technical decisions</li>
+<li>During release planning</li>
+<li>Periodic risk review sessions</li>
+</ul>
+<p><strong>Project Manager</strong> - Invoke when:</p>
+<ul>
+<li>Need project overview or health check</li>
+<li>Preparing status updates</li>
+<li>Planning sprints or releases</li>
+<li>Making schedule/scope decisions</li>
+<li>Coordinating across workstreams</li>
+</ul>
+<p><strong>Release Engineer</strong> - Invoke when:</p>
+<ul>
+<li>Preparing for deployment</li>
+<li>Creating deployment documentation</li>
+<li>Planning rollback procedures</li>
+<li>Responding to production incidents</li>
+<li>Conducting postmortems</li>
+</ul>
+<p><strong>QA Strategist</strong> - Invoke when:</p>
+<ul>
+<li>Planning test strategy for features</li>
+<li>Analyzing escaped defects</li>
+<li>Defining or updating Definition of Done</li>
+<li>Reviewing test coverage</li>
+<li>Investigating flaky tests</li>
+</ul>
+<p><strong>Stakeholder Liaison</strong> - Invoke when:</p>
+<ul>
+<li>Preparing for client meetings</li>
+<li>Delivering difficult news</li>
+<li>Managing conflicting expectations</li>
+<li>Creating communication plans</li>
+<li>Handling escalations</li>
+</ul>
+<hr>
+<h2>Hook Reference</h2>
+<h3>PreToolUse Hooks</h3>
+<p>These run before a tool executes and can block or warn.</p>
+<table class="md-table"><thead><tr><th>Hook</th><th>Trigger</th><th>Behavior</th></tr></thead><tbody><tr><td><code>check-branch.sh</code></td><td>Edit, Write</td><td>Blocks if on main/master branch</td></tr><tr><td><code>validate-commit-message.sh</code></td><td>Bash (git commit)</td><td>Warns if not conventional commit format</td></tr><tr><td><code>pre-release-checklist.sh</code></td><td>Bash (deploy/release)</td><td>Warns if deployment checklist has incomplete items</td></tr></tbody></table>
+<h3>PostToolUse Hooks</h3>
+<p>These run after a tool executes and provide reminders.</p>
+<table class="md-table"><thead><tr><th>Hook</th><th>Trigger</th><th>Behavior</th></tr></thead><tbody><tr><td><code>requirements-sync-reminder.sh</code></td><td>Edit, Write</td><td>Reminds to sync REQUIREMENTS-INDEX.md</td></tr></tbody></table>
+<h3>Stop Hooks</h3>
+<p>These run when a session ends.</p>
+<table class="md-table"><thead><tr><th>Hook</th><th>Behavior</th></tr></thead><tbody><tr><td><code>session-summary-reminder.sh</code></td><td>Prompts for session documentation if commits were made</td></tr><tr><td><code>risk-review-reminder.sh</code></td><td>Lists risks not reviewed in 2+ weeks</td></tr><tr><td><code>sprint-completion-check.sh</code></td><td>Reminds about sprint review if sprint end date passed</td></tr></tbody></table>
+<h3>Hook Configuration</h3>
+<p>Hooks are configured in <code>.claude/settings.json</code>:</p>
+<pre><code>
+{
+  &quot;hooks&quot;: {
+    &quot;PreToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Edit&quot;,
+        &quot;hooks&quot;: [{&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/check-branch.sh&quot;}]
+      },
+      {
+        &quot;matcher&quot;: &quot;Write&quot;,
+        &quot;hooks&quot;: [{&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/check-branch.sh&quot;}]
+      },
+      {
+        &quot;matcher&quot;: &quot;Bash&quot;,
+        &quot;hooks&quot;: [
+          {&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/validate-commit-message.sh&quot;},
+          {&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/pre-release-checklist.sh&quot;}
+        ]
+      }
+    ],
+    &quot;PostToolUse&quot;: [
+      {
+        &quot;matcher&quot;: &quot;Edit&quot;,
+        &quot;hooks&quot;: [{&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/requirements-sync-reminder.sh&quot;}]
+      },
+      {
+        &quot;matcher&quot;: &quot;Write&quot;,
+        &quot;hooks&quot;: [{&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/requirements-sync-reminder.sh&quot;}]
+      }
+    ],
+    &quot;Stop&quot;: [
+      {
+        &quot;hooks&quot;: [
+          {&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/session-summary-reminder.sh&quot;},
+          {&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/risk-review-reminder.sh&quot;},
+          {&quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;.claude/hooks/sprint-completion-check.sh&quot;}
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<hr>
+<h2>Template Reference</h2>
+<h3>Journal Templates</h3>
+<table class="md-table"><thead><tr><th>Template</th><th>ID Format</th><th>Purpose</th></tr></thead><tbody><tr><td><code>decision.md</code></td><td>-</td><td>Architecture Decision Records</td></tr><tr><td><code>lesson.md</code></td><td>-</td><td>Lessons learned documentation</td></tr><tr><td><code>session.md</code></td><td>-</td><td>Work session summaries</td></tr><tr><td><code>feature.md</code></td><td>-</td><td>Feature tracking documents</td></tr></tbody></table>
+<h3>Requirements Templates</h3>
+<table class="md-table"><thead><tr><th>Template</th><th>ID Format</th><th>Purpose</th></tr></thead><tbody><tr><td><code>requirement.md</code></td><td>REQ-NNNN</td><td>Requirement with acceptance criteria</td></tr><tr><td><code>solution.md</code></td><td>SOL-NNNN</td><td>Solution proposal with trade-offs</td></tr><tr><td><code>fit-test.md</code></td><td>-</td><td>Technology evaluation</td></tr><tr><td><code>requirements-index.md</code></td><td>-</td><td>Master requirements index</td></tr></tbody></table>
+<h3>Project Management Templates</h3>
+<table class="md-table"><thead><tr><th>Template</th><th>ID Format</th><th>Purpose</th></tr></thead><tbody><tr><td><code>vision.md</code></td><td>N/A</td><td>Project vision - goals, success criteria, scope</td></tr><tr><td><code>product-spec.md</code></td><td>CAP-NN</td><td>Product specification - capabilities, NFRs, constraints</td></tr><tr><td><code>risk-register.md</code></td><td>RISK-NNNN</td><td>Risk identification, assessment, mitigation</td></tr><tr><td><code>sprint.md</code></td><td>SPRINT-NN</td><td>Sprint planning and tracking</td></tr><tr><td><code>stakeholder-plan.md</code></td><td>STAKE-NNNN</td><td>Communication plan, RACI matrix</td></tr><tr><td><code>change-request.md</code></td><td>CR-NNNN</td><td>Change control and impact analysis</td></tr><tr><td><code>release-notes.md</code></td><td>REL-NNNN</td><td>Release documentation</td></tr><tr><td><code>status-report.md</code></td><td>STATUS-YYYY-WNN</td><td>Weekly/monthly status reports</td></tr><tr><td><code>definition-of-done.md</code></td><td>DOD-{scope}</td><td>Quality gates checklist</td></tr><tr><td><code>traceability-matrix.md</code></td><td>RTM-{project}</td><td>REQ→SOL→Sprint→Test→Release mapping</td></tr><tr><td><code>incident-postmortem.md</code></td><td>INC-NNNN</td><td>Incident analysis and lessons</td></tr><tr><td><code>deployment-checklist.md</code></td><td>DEPLOY-{REL}</td><td>Pre/post deployment verification</td></tr></tbody></table>
+<hr>
+<h2>Entity ID System</h2>
+<h3>ID Formats</h3>
+<table class="md-table"><thead><tr><th>Entity</th><th>Format</th><th>Example</th><th>Sequence</th></tr></thead><tbody><tr><td>Capability</td><td>CAP-NN</td><td>CAP-01</td><td>2-digit, zero-padded</td></tr><tr><td>Requirement</td><td>REQ-NNNN</td><td>REQ-0001</td><td>4-digit, zero-padded</td></tr><tr><td>Solution</td><td>SOL-NNNN</td><td>SOL-0001</td><td>4-digit, zero-padded</td></tr><tr><td>Risk</td><td>RISK-NNNN</td><td>RISK-0001</td><td>4-digit, zero-padded</td></tr><tr><td>Sprint</td><td>SPRINT-NN</td><td>SPRINT-01</td><td>2-digit, zero-padded</td></tr><tr><td>Release</td><td>REL-X.Y.Z</td><td>REL-1.0.0</td><td>Semver</td></tr><tr><td>Change Request</td><td>CR-NNNN</td><td>CR-0001</td><td>4-digit, zero-padded</td></tr><tr><td>Incident</td><td>INC-NNNN</td><td>INC-0001</td><td>4-digit, zero-padded</td></tr><tr><td>Stakeholder Plan</td><td>STAKE-NNNN</td><td>STAKE-0001</td><td>4-digit, zero-padded</td></tr><tr><td>Status Report</td><td>STATUS-YYYY-WNN</td><td>STATUS-2026-W03</td><td>Year + Week</td></tr><tr><td>Definition of Done</td><td>DOD-{scope}</td><td>DOD-project</td><td>Scope name</td></tr><tr><td>Traceability Matrix</td><td>RTM-{project}</td><td>RTM-myapp</td><td>Project name</td></tr><tr><td>Deployment Checklist</td><td>DEPLOY-{REL}</td><td>DEPLOY-REL-1.0.0</td><td>Release version</td></tr></tbody></table>
+<h3>ID Assignment</h3>
+<p>IDs are assigned by:</p>
+<ol>
+<li>Scanning existing files in the appropriate directory</li>
+<li>Finding the highest existing number</li>
+<li>Incrementing by 1</li>
+</ol>
+<h3>Cross-Referencing</h3>
+<p>Use entity IDs to create links between related items:</p>
+<pre><code>
+## Related Items
+
+- **Requirement**: REQ-0001, REQ-0002
+- **Solution**: SOL-0001
+- **Sprint**: SPRINT-03
+- **Risk**: RISK-0005
+- **Release**: REL-1.2.0
+</code></pre>
+<hr>
+<h2>File Structure</h2>
+<h3>Complete Project Structure</h3>
+<pre><code>
+project/
+├── CLAUDE.md                           # Project instructions
+└── .claude/
+    ├── settings.json                   # Hook configuration
+    ├── agents/                         # Symlinks to agents
+    │   ├── requirements-analyst.md → ~/.claude/agents/
+    │   ├── solution-architect.md → ~/.claude/agents/
+    │   ├── risk-manager.md → ~/.claude/agents/
+    │   └── ...
+    ├── commands/                       # Symlinks to commands
+    │   ├── risk.md → ~/.claude/commands/
+    │   ├── sprint.md → ~/.claude/commands/
+    │   └── ...
+    ├── hooks/                          # Symlinks to hooks
+    │   ├── check-branch.sh → ~/.claude/hooks/
+    │   ├── pre-release-checklist.sh → ~/.claude/hooks/
+    │   └── ...
+    ├── journal/
+    │   ├── decisions/                  # Architecture decisions
+    │   │   └── 2026-01-15-api-design.md
+    │   ├── features/                   # Feature tracking
+    │   ├── lessons/                    # Lessons learned
+    │   │   └── 2026-01-20-migration-gotcha.md
+    │   ├── sessions/                   # Session summaries
+    │   └── templates/                  # Symlinks to templates
+    ├── requirements/
+    │   ├── requirements/               # Requirement specs
+    │   │   ├── REQ-0001-user-auth.md
+    │   │   └── REQ-0002-api-design.md
+    │   ├── solutions/                  # Solution proposals
+    │   │   └── SOL-0001-jwt-auth.md
+    │   ├── templates/                  # Symlinks to templates
+    │   ├── README.md
+    │   └── REQUIREMENTS-INDEX.md
+    └── project-management/
+        ├── vision.md                   # Project vision (optional)
+        ├── product-spec.md             # Product specification (required)
+        ├── risks/                      # Risk register entries
+        │   ├── RISK-0001-api-dependency.md
+        │   └── RISK-0002-timeline.md
+        ├── sprints/                    # Sprint documents
+        │   ├── SPRINT-01.md
+        │   └── SPRINT-02.md
+        ├── releases/                   # Release documents
+        │   ├── REL-1.0.0.md
+        │   └── DEPLOY-REL-1.0.0.md
+        ├── changes/                    # Change requests
+        │   └── CR-0001-scope-addition.md
+        ├── incidents/                  # Incident postmortems
+        │   └── INC-0001-outage.md
+        ├── status/                     # Status reports
+        │   ├── STATUS-2026-W03.md
+        │   └── STATUS-2026-W04.md
+        ├── templates/                  # Symlinks to templates
+        ├── backlog.md                  # Product backlog
+        ├── traceability-matrix.md      # RTM
+        └── definition-of-done.md       # Quality gates
+</code></pre>
+<hr>
+<h2>Integration Patterns</h2>
+<h3>Vision → Spec → Requirements Flow</h3>
+<pre><code>
+1. /spec vision                 Creates vision.md (optional)
+2. /spec create                 Creates product-spec.md with CAP-01, CAP-02, etc.
+3. /spec approve                Approves spec, enables requirement creation
+4. /requirement propose         Creates REQ-0001 as candidate, links to CAP-01
+5. /requirement approve REQ-0001  Approves for implementation
+6. /requirement create REQ-0001   Adds detailed acceptance criteria
+</code></pre>
+<h3>Requirements → Sprint Flow</h3>
+<pre><code>
+1. /requirement create REQ-0001 Creates detailed requirement (status: active)
+2. /solution create             Creates SOL-0001, links to REQ-0001
+3. /backlog add                 Adds REQ-0001 to backlog
+4. /sprint start                Pulls REQ-0001 into SPRINT-01
+5. /sprint complete REQ-0001    Marks complete
+6. Update traceability matrix   CAP-01 → REQ-0001 → SOL-0001 → SPRINT-01
+</code></pre>
+<h3>Risk → Mitigation Flow</h3>
+<pre><code>
+1. /risk create                 Creates RISK-0001
+2. /risk assess                 Full risk assessment session
+3. /risk matrix                 Visualize priorities
+4. Work on mitigation           Update RISK-0001 with progress
+5. /risk update RISK-0001       Reassess, possibly close
+</code></pre>
+<h3>Change Request Flow</h3>
+<pre><code>
+1. /change create               Creates CR-0001 with impact analysis
+2. Review impact                Schedule, effort, scope, cost
+3. /change approve CR-0001      Record approval
+4. Update sprint                Add work to current or next sprint
+5. /change implement CR-0001    Track implementation
+</code></pre>
+<h3>Release Flow</h3>
+<pre><code>
+1. /release plan                Creates REL-1.0.0
+2. /release prepare             Verify completeness
+3. /release checklist           Creates DEPLOY-REL-1.0.0
+4. Walk through checklist       Pre-deployment verification
+5. /release deploy              Execute deployment
+6. Monitor                      Watch for issues
+7. (if issues) /release rollback Execute rollback, create incident
+</code></pre>
+<h3>Incident Response Flow</h3>
+<pre><code>
+1. Incident detected            Alert or user report
+2. Triage and assess severity   S1-Critical to S4-Minor
+3. Investigate and mitigate     Fix or workaround
+4. Create postmortem            INC-0001 with timeline, root cause
+5. Create action items          Prevent recurrence
+6. /risk create                 If pattern indicates systemic risk
+</code></pre>
+<hr>
+<h2>Best Practices</h2>
+<h3>General</h3>
+<ol>
+<li><strong>Start small</strong> - Use only what you need; add more as complexity grows</li>
+<li><strong>Be consistent</strong> - Use the same patterns and conventions throughout</li>
+<li><strong>Keep it current</strong> - Stale documentation is worse than no documentation</li>
+<li><strong>Link entities</strong> - Cross-reference related items for traceability</li>
+<li><strong>Review regularly</strong> - Risks, backlog, and status should be reviewed weekly</li>
+</ol>
+<h3>Requirements</h3>
+<ul>
+<li>Write acceptance criteria that are specific and testable</li>
+<li>One requirement per user-visible capability</li>
+<li>Keep requirements independent when possible</li>
+<li>Use the <code>requirements-analyst</code> agent for complex requirements</li>
+</ul>
+<h3>Sprints</h3>
+<ul>
+<li>Don't overcommit (80% capacity rule)</li>
+<li>Have a clear, achievable sprint goal</li>
+<li>Track daily progress, not just end-of-sprint</li>
+<li>Always do retrospectives - they're where improvement comes from</li>
+</ul>
+<h3>Risks</h3>
+<ul>
+<li>Identify risks early - they're cheaper to mitigate</li>
+<li>Review risks at least bi-weekly</li>
+<li>Close risks that are no longer relevant</li>
+<li>Create new risks when patterns emerge</li>
+</ul>
+<h3>Releases</h3>
+<ul>
+<li>Never skip the checklist</li>
+<li>Always have a rollback plan</li>
+<li>Deploy when you can monitor (not Fridays)</li>
+<li>Communicate before, during, and after</li>
+</ul>
+<h3>Communication</h3>
+<ul>
+<li>No surprises for stakeholders</li>
+<li>Bad news travels best when delivered early</li>
+<li>Tailor communication to the audience</li>
+<li>Document decisions in journal</li>
+</ul>
+<hr>
+<h2>Appendix: Risk-Appropriate Usage</h2>
+<p>Not every project needs every feature. Use this guide:</p>
+<h3>Zero-Risk Projects (bodmail, iwpi-lab)</h3>
+<p><strong>Required</strong>:</p>
+<ul>
+<li>Basic requirements tracking (<code>/requirement</code>)</li>
+<li>Session summaries (<code>/session-summary</code>)</li>
+</ul>
+<p><strong>Optional</strong>:</p>
+<ul>
+<li>Everything else - use what helps learning</li>
+</ul>
+<h3>Medium-Risk Projects (peabod-www)</h3>
+<p><strong>Required</strong>:</p>
+<ul>
+<li>Requirements tracking (<code>/requirement</code>, <code>/solution</code>)</li>
+<li>Sprint management (<code>/sprint</code>, <code>/backlog</code>)</li>
+<li>Basic status reporting (<code>/status quick</code>)</li>
+<li>Release management (<code>/release</code>)</li>
+</ul>
+<p><strong>Recommended</strong>:</p>
+<ul>
+<li>Risk management (<code>/risk</code>)</li>
+<li>Change control (<code>/change</code>)</li>
+</ul>
+<h3>High-Risk Projects (nanawall)</h3>
+<p><strong>Required</strong>:</p>
+<ul>
+<li>Full requirements tracking</li>
+<li>Sprint management with retrospectives</li>
+<li>Comprehensive status reporting</li>
+<li>Full release management with checklists</li>
+<li>Risk management</li>
+<li>Change control</li>
+<li>Stakeholder communication plan</li>
+</ul>
+<p><strong>Recommended</strong>:</p>
+<ul>
+<li>Incident management procedures</li>
+<li>Quality metrics tracking</li>
+<li>Regular traceability matrix updates</li>
+</ul>
+<hr>
+<h2>Quick Start Checklist</h2>
+<p>For your first project using this system:</p>
+<pre><code>
+[ ] Run ~/.claude/claude-init.sh /path/to/project
+[ ] Select appropriate agents (include 12-risk-manager, 13-project-manager)
+[ ] Create project CLAUDE.md
+[ ] Customize definition-of-done.md
+
+# Foundation (NEW - do this before requirements)
+[ ] Create project vision (optional): /spec vision
+[ ] Create product specification: /spec create
+[ ] Define capabilities with priorities
+[ ] Approve specification: /spec approve
+
+# Requirements
+[ ] Propose requirements from capabilities: /requirement propose
+[ ] Approve requirements: /requirement approve REQ-0001
+[ ] Add detailed specification: /requirement create REQ-0001
+[ ] Create solutions: /solution create
+[ ] Set up backlog: /backlog add
+
+# Execution
+[ ] Identify initial risks: /risk assess
+[ ] Start first sprint: /sprint start
+[ ] Do daily standups: /standup
+[ ] Complete sprint: /sprint review, /retrospective
+[ ] Plan first release: /release plan
+[ ] Deploy: /release checklist, /release deploy
+</code></pre>
+<hr>
+<p><em>This document will inform the implementation of the automated coding system project, which will be the first project to fully utilize this enterprise project management system.</em></p></div>
+  </main>
+
+  <script>
+    
+function toggleNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+  var isOpen = menu.classList.contains('open');
+
+  menu.classList.toggle('open');
+  overlay.classList.toggle('open');
+  if (btn) btn.classList.toggle('open');
+}
+
+function closeNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+
+  menu.classList.remove('open');
+  overlay.classList.remove('open');
+  if (btn) btn.classList.remove('open');
+}
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeNavMenu();
+});
+
+
+    function refreshDashboard() {
+      var btn = document.querySelector('.refresh-btn');
+      if (btn) btn.classList.add('spinning');
+      var returnPath = window.location.pathname + window.location.search;
+      window.location.href = '/refresh?return=' + encodeURIComponent(returnPath);
+    }
+
+    
+  </script>
+</body>
+</html>

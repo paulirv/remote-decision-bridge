@@ -1,0 +1,203 @@
+{
+  "_meta": {
+    "generated": "2026-02-13T21:03:34.005Z",
+    "total": 6
+  },
+  "byId": {
+    "REQ-0021": {
+      "id": "REQ-0021",
+      "title": "Remote Question Delivery",
+      "status": "implemented",
+      "priority": "must-have",
+      "category": "feature",
+      "capability": "CAP-01",
+      "acProgress": {
+        "complete": 5,
+        "total": 5
+      },
+      "htmlPath": "requirements/REQ-0021.html",
+      "solutions": [
+        "SOL-0003"
+      ],
+      "dependsOn": [],
+      "blockedBy": [],
+      "relatedTo": [
+        "REQ-0020",
+        "REQ-0022",
+        "REQ-0024"
+      ]
+    },
+    "REQ-0022": {
+      "id": "REQ-0022",
+      "title": "Remote Answer Collection",
+      "status": "implemented",
+      "priority": "must-have",
+      "category": "feature",
+      "capability": "CAP-02",
+      "acProgress": {
+        "complete": 5,
+        "total": 5
+      },
+      "htmlPath": "requirements/REQ-0022.html",
+      "solutions": [
+        "SOL-0003"
+      ],
+      "dependsOn": [
+        "REQ-0021"
+      ],
+      "blockedBy": [],
+      "relatedTo": [
+        "REQ-0020",
+        "REQ-0021",
+        "REQ-0026"
+      ]
+    },
+    "REQ-0023": {
+      "id": "REQ-0023",
+      "title": "Status Notifications",
+      "status": "implemented",
+      "priority": "must-have",
+      "category": "feature",
+      "capability": "CAP-03",
+      "acProgress": {
+        "complete": 5,
+        "total": 5
+      },
+      "htmlPath": "requirements/REQ-0023.html",
+      "solutions": [
+        "SOL-0003"
+      ],
+      "dependsOn": [],
+      "blockedBy": [],
+      "relatedTo": [
+        "REQ-0020",
+        "REQ-0024",
+        "REQ-0025"
+      ]
+    },
+    "REQ-0024": {
+      "id": "REQ-0024",
+      "title": "Secure Communication",
+      "status": "implemented",
+      "priority": "must-have",
+      "category": "feature",
+      "capability": "CAP-04",
+      "acProgress": {
+        "complete": 4,
+        "total": 4
+      },
+      "htmlPath": "requirements/REQ-0024.html",
+      "solutions": [
+        "SOL-0003"
+      ],
+      "dependsOn": [],
+      "blockedBy": [],
+      "relatedTo": [
+        "REQ-0020",
+        "REQ-0021",
+        "REQ-0022",
+        "REQ-0023"
+      ]
+    },
+    "REQ-0025": {
+      "id": "REQ-0025",
+      "title": "Session Context",
+      "status": "implemented",
+      "priority": "should-have",
+      "category": "feature",
+      "capability": "CAP-05",
+      "acProgress": {
+        "complete": 5,
+        "total": 5
+      },
+      "htmlPath": "requirements/REQ-0025.html",
+      "solutions": [
+        "SOL-0003"
+      ],
+      "dependsOn": [
+        "REQ-0021",
+        "REQ-0023"
+      ],
+      "blockedBy": [],
+      "relatedTo": [
+        "REQ-0020"
+      ]
+    },
+    "REQ-0026": {
+      "id": "REQ-0026",
+      "title": "Question Timeout & Expiry",
+      "status": "implemented",
+      "priority": "should-have",
+      "category": "feature",
+      "capability": "CAP-06",
+      "acProgress": {
+        "complete": 4,
+        "total": 4
+      },
+      "htmlPath": "requirements/REQ-0026.html",
+      "solutions": [
+        "SOL-0003"
+      ],
+      "dependsOn": [
+        "REQ-0021",
+        "REQ-0022"
+      ],
+      "blockedBy": [],
+      "relatedTo": [
+        "REQ-0020"
+      ]
+    }
+  },
+  "byStatus": {
+    "implemented": [
+      "REQ-0021",
+      "REQ-0022",
+      "REQ-0023",
+      "REQ-0024",
+      "REQ-0025",
+      "REQ-0026"
+    ]
+  },
+  "byPriority": {
+    "must-have": [
+      "REQ-0021",
+      "REQ-0022",
+      "REQ-0023",
+      "REQ-0024"
+    ],
+    "should-have": [
+      "REQ-0025",
+      "REQ-0026"
+    ]
+  },
+  "byCapability": {
+    "cap-01": [
+      "REQ-0021"
+    ],
+    "cap-02": [
+      "REQ-0022"
+    ],
+    "cap-03": [
+      "REQ-0023"
+    ],
+    "cap-04": [
+      "REQ-0024"
+    ],
+    "cap-05": [
+      "REQ-0025"
+    ],
+    "cap-06": [
+      "REQ-0026"
+    ]
+  },
+  "byCategory": {
+    "feature": [
+      "REQ-0021",
+      "REQ-0022",
+      "REQ-0023",
+      "REQ-0024",
+      "REQ-0025",
+      "REQ-0026"
+    ]
+  }
+}

@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - remote-decision-bridge</title>
+  <style>
+    
+:root {
+  /* ── Colors ── */
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* ── Semantic Colors ── */
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+
+  /* ── Extended Palette ── */
+  --purple: #a855f7;
+  --cyan: #06b6d4;
+  --orange: #f97316;
+
+  /* ── Borders ── */
+  --border: #334155;
+
+  /* ── Spacing Scale ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* ── Typography ── */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+
+  --text-xs: 18px;
+  --text-sm: 20px;
+  --text-base: 24px;
+  --text-lg: 28px;
+  --text-xl: 34px;
+  --text-2xl: 40px;
+  --text-3xl: 48px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Border Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+
+  /* ── Status Colors (semantic mapping) ── */
+  --status-completed: var(--success);
+  --status-implemented: var(--cyan);
+  --status-active: var(--accent);
+  --status-approved: var(--purple);
+  --status-candidate: var(--orange);
+  --status-draft: var(--text-muted);
+  --status-rejected: var(--danger);
+  --status-deprecated: var(--text-dim);
+  --status-todo: var(--text-dim);
+  --status-in-progress: var(--cyan);
+  --status-done: var(--success);
+
+  /* ── Priority Colors ── */
+  --priority-must-have: var(--danger);
+  --priority-should-have: var(--warning);
+  --priority-could-have: var(--success);
+  --priority-wont-have: var(--text-dim);
+
+  /* ── Risk Colors ── */
+  --risk-high: var(--danger);
+  --risk-medium: var(--warning);
+  --risk-low: var(--success);
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+:root {
+  --bg: #0a1410;
+  --bg-card: #152420;
+  --bg-hover: #1e3530;
+  --text: #e8ede9;
+  --text-muted: #8fa898;
+  --text-dim: #5e7a68;
+  --accent: #4ade80;
+  --accent-hover: #86efac;
+  --border: #2d4a3a;
+  --purple: #a78bfa;
+  --cyan: #5eead4;
+  --orange: #fb923c;
+}
+    
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+    
+/* ── Hamburger Button ── */
+.hamburger-btn {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  transition: background var(--transition-fast);
+}
+
+.hamburger-btn:hover {
+  background: var(--bg-hover);
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ── Overlay ── */
+.nav-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.nav-menu-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Slide-in Menu ── */
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transition: right var(--transition-slow);
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-menu.open {
+  right: 0;
+}
+
+.nav-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-menu-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.nav-menu-close {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-2xl);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-close:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* ── Links ── */
+.nav-menu-links {
+  flex: 1;
+  padding: var(--space-sm) 0;
+  overflow-y: auto;
+}
+
+.nav-menu-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-link:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-menu-link.active {
+  color: var(--accent);
+  background: rgba(59,130,246,0.1);
+  border-right: 3px solid var(--accent);
+}
+
+.nav-menu-icon {
+  font-size: var(--text-lg);
+  width: 24px;
+  text-align: center;
+}
+
+.nav-menu-label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+/* ── Footer ── */
+.nav-menu-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.nav-menu-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nav-menu-meta-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-menu-meta-value {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.nav-menu-refresh {
+  display: block;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--accent);
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.nav-menu-refresh:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+    
+/* ── Badges ── */
+.c-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── Progress Bar ── */
+.c-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.c-progress-track {
+  width: 100%;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.c-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-slow);
+}
+
+.c-progress-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ── Entity Links ── */
+.c-entity-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+}
+
+.c-entity-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* ── Stat Cards ── */
+.c-stat {
+  text-align: center;
+}
+
+.c-stat-value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.c-stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* ── Breadcrumbs ── */
+.c-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.c-crumb {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.c-crumb:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.c-crumb--current {
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+.c-crumb-sep {
+  color: var(--text-dim);
+}
+
+
+    /* ── Page Header ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      min-width: 0;
+    }
+
+    .page-header-project {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
+      color: var(--accent);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .page-header-project + .c-breadcrumbs,
+    .page-header-project + .page-header-title {
+      padding-left: var(--space-md);
+      border-left: 2px solid var(--border);
+    }
+
+    .page-header-title {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-shrink: 0;
+    }
+
+    /* ── Refresh Button ── */
+    .refresh-btn {
+      width: 48px;
+      height: 48px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    }
+    .refresh-btn:hover {
+      background: var(--bg-hover);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .refresh-btn.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Main Content ── */
+    .page-main {
+      flex: 1;
+      padding: var(--space-lg);
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .page-header {
+        padding: var(--space-sm) var(--space-md);
+      }
+
+      .page-main {
+        padding: var(--space-md);
+      }
+    }
+
+    
+/* ── Sprint Banner ── */
+.sprint-banner {
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-hover));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg) var(--space-xl);
+  margin-bottom: var(--space-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-xl);
+  text-decoration: none;
+  color: inherit;
+}
+.sprint-banner:hover { border-color: var(--accent); }
+.sprint-banner.no-sprint {
+  background: var(--bg-card);
+  border-style: dashed;
+}
+.sprint-banner-title {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-xs);
+}
+.sprint-banner-name {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-xs);
+}
+.sprint-banner-dates {
+  font-size: var(--text-sm);
+  color: var(--text-dim);
+}
+.sprint-banner-stats {
+  display: flex;
+  gap: var(--space-xl);
+}
+.sprint-stat { text-align: center; }
+.sprint-stat-value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+}
+.sprint-stat-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* ── Summary Grid ── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+.summary-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+}
+.summary-card .label {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+.summary-card .value {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+}
+.summary-card .subtext {
+  color: var(--text-dim);
+  font-size: var(--text-xs);
+  margin-top: var(--space-xs);
+}
+
+/* ── Main Grid ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-xl);
+}
+@media (max-width: 1024px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Section Cards ── */
+.dash-section {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: var(--space-xl);
+}
+.dash-section-header {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.dash-section-header h2 {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.dash-section-header a { color: inherit; text-decoration: none; }
+.dash-section-header a:hover { color: var(--accent); }
+.dash-section-content { padding: var(--space-md) var(--space-lg); }
+
+/* ── Full-width Section ── */
+.full-width { grid-column: 1 / -1; margin-bottom: var(--space-xl); }
+
+/* ── Progress Segments ── */
+.progress-segments {
+  display: flex;
+  height: 8px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.progress-segments .segment { height: 100%; }
+.segment.completed { background: var(--success); }
+.segment.implemented { background: var(--accent); }
+.segment.approved { background: var(--purple); }
+.segment.active { background: var(--cyan); }
+.segment.draft { background: var(--text-muted); }
+.segment.candidate { background: var(--orange); }
+
+.progress-legend {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.legend-dot.completed { background: var(--success); }
+.legend-dot.implemented { background: var(--accent); }
+.legend-dot.approved { background: var(--purple); }
+.legend-dot.candidate { background: var(--orange); }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { background: var(--accent); color: white; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Requirement List ── */
+.req-list { list-style: none; }
+.req-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.req-item:last-child { border-bottom: none; }
+.req-item:hover { background: var(--bg); }
+.req-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  background: var(--bg);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-sm);
+}
+.req-id a { color: inherit; text-decoration: none; }
+.req-id:hover a { color: var(--accent); }
+.req-title { flex: 1; font-size: var(--text-sm); }
+.req-progress {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Priority Badges (inline) ── */
+.priority-badge {
+  font-size: var(--text-xs);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-weight: var(--weight-medium);
+  margin-left: var(--space-sm);
+}
+.priority-badge.must-have { background: rgba(239,68,68,0.2); color: var(--danger); }
+.priority-badge.should-have { background: rgba(234,179,8,0.2); color: var(--warning); }
+.priority-badge.could-have { background: rgba(34,197,94,0.2); color: var(--success); }
+
+/* ── Backlog ── */
+.backlog-category { margin-bottom: var(--space-md); }
+.backlog-category:last-child { margin-bottom: 0; }
+.backlog-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-sm);
+  color: var(--text-muted);
+}
+.backlog-count {
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: var(--text-xs);
+}
+.backlog-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.backlog-item {
+  background: var(--bg);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: var(--text-xs);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.backlog-item.done {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.backlog-req {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--accent);
+  margin-right: 6px;
+  opacity: 0.8;
+}
+
+/* ── Sprint Velocity Chart ── */
+.sprint-stats-grid {
+  display: flex;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+.sprint-stat-card {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  text-align: center;
+}
+.sprint-trend-indicator {
+  font-size: var(--text-sm);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+.sprint-trend-indicator.up { color: var(--success); }
+.sprint-trend-indicator.down { color: var(--danger); }
+.sprint-trend-indicator.flat { color: var(--text-muted); }
+.velocity-chart { margin-top: var(--space-md); }
+.velocity-chart-title {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: var(--space-sm);
+}
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-md);
+  height: 100px;
+  padding-bottom: var(--space-md);
+}
+.chart-bar-group { text-align: center; flex: 1; }
+.chart-bar-pair {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  align-items: flex-end;
+  height: 96px;
+}
+.chart-bar {
+  width: 16px;
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+}
+.chart-bar.committed { background: var(--text-dim); opacity: 0.5; }
+.chart-bar.completed-bar { background: var(--success); }
+.chart-bar-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+.chart-legend {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+}
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.chart-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+}
+.chart-legend-swatch.committed { background: var(--text-dim); opacity: 0.5; }
+.chart-legend-swatch.completed-bar { background: var(--success); }
+
+/* ── Sprint Card (sidebar) ── */
+.sprint-card {
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sprint-card:hover { background: var(--bg-hover); }
+.sprint-name { font-weight: var(--weight-semibold); margin-bottom: var(--space-xs); }
+.sprint-dates {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-bottom: var(--space-md);
+}
+.sprint-velocity { display: flex; gap: var(--space-md); font-size: var(--text-sm); }
+.velocity-item { display: flex; align-items: center; gap: 6px; }
+.velocity-value { font-weight: var(--weight-semibold); color: var(--success); }
+
+/* ── Risk Item ── */
+.risk-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.risk-item:last-child { border-bottom: none; }
+.risk-item:hover { background: var(--bg); }
+.risk-score-box {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
+}
+.risk-score-box.high { background: rgba(239,68,68,0.2); color: var(--danger); }
+.risk-score-box.medium { background: rgba(234,179,8,0.2); color: var(--warning); }
+.risk-score-box.low { background: rgba(34,197,94,0.2); color: var(--success); }
+.risk-details { flex: 1; }
+.risk-title { font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.risk-meta { font-size: var(--text-xs); color: var(--text-dim); }
+
+/* ── Lesson Item ── */
+.lesson-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.lesson-item:last-child { border-bottom: none; }
+.lesson-item:hover { background: var(--bg); }
+.lesson-date {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+.lesson-title { font-size: var(--text-sm); margin-top: 2px; }
+
+/* ── Commit Item ── */
+.commit-hash { color: var(--accent); font-family: var(--font-mono); font-size: var(--text-xs); }
+.commit-author { color: var(--text-muted); margin-left: var(--space-sm); font-size: var(--text-xs); }
+
+/* ── Vision Quote ── */
+.vision-quote {
+  font-style: italic;
+  color: var(--text-muted);
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
+/* ── Dependency Section ── */
+.dep-stats {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+.cycle-warning {
+  background: rgba(239,68,68,0.2);
+  color: var(--danger);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+.dep-section-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+.view-toggle {
+  display: flex;
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 2px;
+}
+.view-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  transition: all 0.2s;
+}
+.view-btn:hover { color: var(--text); }
+.view-btn.active { background: var(--accent); color: white; }
+.dep-view { display: none; }
+.dep-view.active { display: block; }
+
+/* ── Sprint Gantt (in dependency section) ── */
+.sprint-gantt-view { padding: var(--space-md); }
+.sprint-gantt-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 10px var(--space-md);
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+.sprint-gantt-stat { font-size: var(--text-sm); color: var(--text-muted); }
+.sprint-gantt-stat strong { color: var(--text); }
+.sprint-gantt-sep { width: 1px; height: 16px; background: var(--border); }
+.sprint-gantt-rows { display: flex; flex-direction: column; gap: 4px; }
+.sprint-gantt-cap {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--cyan);
+  padding: 6px var(--space-md);
+  background: rgba(6,182,212,0.08);
+  border-radius: var(--radius-sm);
+  margin-top: var(--space-sm);
+}
+.sprint-gantt-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 4px var(--space-md);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+.sprint-gantt-row:hover { background: var(--bg); }
+.sprint-gantt-label { display: flex; align-items: center; gap: var(--space-sm); overflow: hidden; }
+.sprint-gantt-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.sprint-gantt-title {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sprint-gantt-bar-area { position: relative; }
+.sprint-gantt-bar {
+  height: 20px;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.sprint-gantt-bar.sg-done { background: var(--success); }
+.sprint-gantt-bar.sg-implemented { background: var(--accent); }
+.sprint-gantt-bar.sg-inprogress { background: var(--cyan); }
+.sprint-gantt-bar.sg-todo { background: var(--text-dim); opacity: 0.5; }
+.sprint-gantt-bar-text {
+  font-size: var(--text-xs);
+  color: white;
+  padding: 0 8px;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+.sprint-gantt-progress {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  background: var(--success);
+  border-radius: 3px 0 0 3px;
+  opacity: 0.85;
+}
+.sprint-gantt-status {
+  font-size: var(--text-xs);
+  text-align: right;
+  text-transform: uppercase;
+}
+.sprint-gantt-status.sg-done { color: var(--success); }
+.sprint-gantt-status.sg-implemented { color: var(--accent); }
+.sprint-gantt-status.sg-inprogress { color: var(--cyan); }
+.sprint-gantt-status.sg-todo { color: var(--text-dim); }
+.sprint-gantt-legend {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+.sprint-gantt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+.sprint-gantt-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+.sprint-gantt-dot.sg-done { background: var(--success); }
+.sprint-gantt-dot.sg-inprogress { background: var(--cyan); }
+.sprint-gantt-dot.sg-todo { background: var(--text-dim); opacity: 0.5; }
+.sprint-gantt-dot.sg-progress-legend {
+  background: linear-gradient(to right, var(--success) 50%, var(--text-dim) 50%);
+  opacity: 0.85;
+}
+
+/* ── Dependency List View ── */
+.dep-list { list-style: none; }
+.dep-list-item {
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+.dep-list-item:last-child { border-bottom: none; }
+.dep-list-deps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--text-dim);
+  font-size: var(--text-sm);
+}
+
+/* ── Link Resets ── */
+a.doc-link { color: inherit; text-decoration: none; }
+a.doc-link:hover { color: var(--accent); }
+
+/* ── Health Score ── */
+.health-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+.health-gauge {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+.health-gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.health-gauge circle { fill: none; stroke-width: 6; }
+.health-gauge .track { stroke: var(--bg); }
+.health-gauge .fill { stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+.health-score-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+.health-grade {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+.health-factors {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+  flex: 1;
+}
+.health-factor {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.health-factor-name {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.health-factor-score {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+.health-factor-detail {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-header-project">remote-decision-bridge</span>
+      <nav class="c-breadcrumbs"><span class="c-crumb c-crumb--current">Dashboard</span></nav>
+      
+    </div>
+    <div class="page-header-right">
+      <button class="refresh-btn" onclick="refreshDashboard()" aria-label="Refresh dashboard" title="Refresh dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"></path>
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+          <path d="M3 22v-6h6"></path>
+          <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+        </svg>
+      </button>
+      <button class="hamburger-btn" onclick="toggleNavMenu()" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  
+  <div class="nav-menu-overlay" id="nav-menu-overlay" onclick="closeNavMenu()"></div>
+  <nav class="nav-menu" id="nav-menu">
+    <div class="nav-menu-header">
+      <span class="nav-menu-title">Navigation</span>
+      <button class="nav-menu-close" onclick="closeNavMenu()" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="nav-menu-links">
+      <a href="mission-control.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎯</span>
+      <span class="nav-menu-label">Mission Control</span>
+    </a>
+      <a href="dashboard.html" class="nav-menu-link active">
+      <span class="nav-menu-icon">📊</span>
+      <span class="nav-menu-label">Dashboard</span>
+    </a>
+      <a href="requirements-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📋</span>
+      <span class="nav-menu-label">Requirements</span>
+    </a>
+      <a href="journal-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📖</span>
+      <span class="nav-menu-label">Journal</span>
+    </a>
+      <a href="product-spec.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📝</span>
+      <span class="nav-menu-label">Product Spec</span>
+    </a>
+      <a href="vision.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔭</span>
+      <span class="nav-menu-label">Vision</span>
+    </a>
+      <a href="ux-reviews-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎨</span>
+      <span class="nav-menu-label">UX Reviews</span>
+    </a>
+      <a href="bugs-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🐛</span>
+      <span class="nav-menu-label">Bugs</span>
+    </a>
+      <a href="traceability.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔗</span>
+      <span class="nav-menu-label">Traceability</span>
+    </a>
+      <a href="pm-cheatsheet.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📌</span>
+      <span class="nav-menu-label">PM Cheatsheet</span>
+    </a>
+      <a href="pm-reference.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📚</span>
+      <span class="nav-menu-label">PM Reference</span>
+    </a>
+    </div>
+    <div class="nav-menu-footer">
+      <div class="nav-menu-meta">
+        <span class="nav-menu-meta-label">Last generated</span>
+        <span class="nav-menu-meta-value">Feb 13, 2026, 1:03 PM</span>
+      </div>
+      <a href="/refresh" class="nav-menu-refresh" title="Regenerate dashboard">Refresh Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="page-main">
+    
+    <div class="health-bar">
+    <div class="health-gauge">
+      <svg viewBox="0 0 64 64">
+        <circle class="track" cx="32" cy="32" r="26"></circle>
+        <circle class="fill" cx="32" cy="32" r="26" stroke="var(--warning)"
+          stroke-dasharray="163.36281798666926" stroke-dashoffset="42.474332676534004"></circle>
+      </svg>
+      <div class="health-score-text" style="color:var(--warning);">74</div>
+    </div>
+    <div>
+      <span style="font-weight:var(--weight-semibold);margin-right:var(--space-sm);">Project Health</span>
+      <span class="health-grade" style="background:var(--warning);color:white;">Grade C</span>
+    </div>
+    <div class="health-factors">
+      <div class="health-factor">
+      <div class="health-factor-name">Requirements (30%)</div>
+      <div class="health-factor-score" style="color:var(--warning);">70/100</div>
+      <div class="health-factor-detail">0/6 complete, 6 implemented</div>
+    </div><div class="health-factor">
+      <div class="health-factor-name">Sprints (25%)</div>
+      <div class="health-factor-score" style="color:var(--warning);">50/100</div>
+      <div class="health-factor-detail">No sprints</div>
+    </div><div class="health-factor">
+      <div class="health-factor-name">Risks (20%)</div>
+      <div class="health-factor-score" style="color:var(--success);">100/100</div>
+      <div class="health-factor-detail">No risks identified</div>
+    </div><div class="health-factor">
+      <div class="health-factor-name">Bugs (15%)</div>
+      <div class="health-factor-score" style="color:var(--success);">100/100</div>
+      <div class="health-factor-detail">No bugs</div>
+    </div><div class="health-factor">
+      <div class="health-factor-name">Process (10%)</div>
+      <div class="health-factor-score" style="color:var(--warning);">55/100</div>
+      <div class="health-factor-detail">spec, requirements, progress</div>
+    </div>
+    </div>
+  </div>
+    <div class="sprint-banner no-sprint">
+      <div>
+        <div class="sprint-banner-title">No Active Sprint</div>
+        <div class="sprint-banner-name">Ready to start a new sprint</div>
+      </div>
+    </div>
+    <div class="summary-grid">
+    <div class="summary-card">
+      <div class="label">Requirements Complete</div>
+      <div class="value" style="color:var(--success);">0/6</div>
+      <div class="subtext">0% complete</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">In Progress</div>
+      <div class="value" style="color:var(--accent);">6</div>
+      <div class="subtext">Implemented, pending verification</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Ready to Start</div>
+      <div class="value" style="color:var(--purple);">0</div>
+      <div class="subtext">Approved requirements</div>
+    </div>
+    
+    <div class="summary-card">
+      <div class="label">Active Risks</div>
+      <div class="value" style="color:var(--success);">0</div>
+      <div class="subtext">0 high priority</div>
+    </div>
+    
+    <div class="summary-card">
+      <div class="label">Backlog Items</div>
+      <div class="value">0</div>
+      <div class="subtext">0 completed</div>
+    </div>
+    <div class="summary-card">
+      <div class="label">Active Sprints</div>
+      <div class="value" style="color:inherit;">0</div>
+      <div class="subtext">0 completed, 0 total</div>
+    </div>
+    
+  </div>
+    
+    <div class="main-grid">
+      <div class="left-column">
+        <div class="dash-section">
+    <div class="dash-section-header">
+      <h2><a href="requirements-dashboard.html">Requirements Progress</a></h2>
+    </div>
+    <div class="dash-section-content">
+      <div class="progress-segments">
+        <div class="segment completed" style="width:0.0%"></div>
+        <div class="segment implemented" style="width:100.0%"></div>
+        <div class="segment active" style="width:0.0%"></div>
+        <div class="segment approved" style="width:0.0%"></div>
+        <div class="segment draft" style="width:0.0%"></div>
+        <div class="segment candidate" style="width:0.0%"></div>
+      </div>
+      <div class="progress-legend">
+        <div class="legend-item"><div class="legend-dot completed"></div><span>Completed (0)</span></div>
+        <div class="legend-item"><div class="legend-dot implemented"></div><span>Implemented (6)</span></div>
+        
+        <div class="legend-item"><div class="legend-dot approved"></div><span>Approved (0)</span></div>
+        
+        
+      </div>
+
+      <div class="tabs" style="margin-top:var(--space-lg);">
+        <button class="tab active" data-tab="implemented">Implemented</button><button class="tab" data-tab="approved">Approved</button><button class="tab" data-tab="completed">Completed</button>
+      </div>
+
+      
+      
+      <div class="tab-content " id="candidate">
+        <ul class="req-list"><li class="empty-state">No requirements</li></ul>
+      </div>
+      <div class="tab-content active" id="implemented">
+        <ul class="req-list"><li class="req-item" onclick="window.location.href='requirements/REQ-0021.html'">
+      <span class="req-id"><a href="requirements/REQ-0021.html">REQ-0021</a></span>
+      <span class="req-title">Remote Question Delivery</span>
+      <span class="priority-badge must-have">must-have</span>
+      <span class="req-progress">5/5</span>
+    </li><li class="req-item" onclick="window.location.href='requirements/REQ-0022.html'">
+      <span class="req-id"><a href="requirements/REQ-0022.html">REQ-0022</a></span>
+      <span class="req-title">Remote Answer Collection</span>
+      <span class="priority-badge must-have">must-have</span>
+      <span class="req-progress">5/5</span>
+    </li><li class="req-item" onclick="window.location.href='requirements/REQ-0023.html'">
+      <span class="req-id"><a href="requirements/REQ-0023.html">REQ-0023</a></span>
+      <span class="req-title">Status Notifications</span>
+      <span class="priority-badge must-have">must-have</span>
+      <span class="req-progress">5/5</span>
+    </li><li class="req-item" onclick="window.location.href='requirements/REQ-0024.html'">
+      <span class="req-id"><a href="requirements/REQ-0024.html">REQ-0024</a></span>
+      <span class="req-title">Secure Communication</span>
+      <span class="priority-badge must-have">must-have</span>
+      <span class="req-progress">4/4</span>
+    </li><li class="req-item" onclick="window.location.href='requirements/REQ-0025.html'">
+      <span class="req-id"><a href="requirements/REQ-0025.html">REQ-0025</a></span>
+      <span class="req-title">Session Context</span>
+      <span class="priority-badge should-have">should-have</span>
+      <span class="req-progress">5/5</span>
+    </li><li class="req-item" onclick="window.location.href='requirements/REQ-0026.html'">
+      <span class="req-id"><a href="requirements/REQ-0026.html">REQ-0026</a></span>
+      <span class="req-title">Question Timeout &amp; Expiry</span>
+      <span class="priority-badge should-have">should-have</span>
+      <span class="req-progress">4/4</span>
+    </li></ul>
+      </div>
+      <div class="tab-content" id="approved">
+        <ul class="req-list"><li class="empty-state">No requirements</li></ul>
+      </div>
+      <div class="tab-content" id="completed">
+        <ul class="req-list"><li class="empty-state">No requirements</li></ul>
+      </div>
+    </div>
+  </div>
+        <div class="dash-section">
+    <div class="dash-section-header">
+      <h2>Backlog</h2>
+      <span style="font-size:var(--text-xs);color:var(--text-muted);">Last groomed: </span>
+    </div>
+    <div class="dash-section-content">
+      <div class="backlog-category">
+        <div class="backlog-header">Must Have <span class="backlog-count">0 remaining</span></div>
+        <div class="backlog-items"></div>
+      </div>
+      <div class="backlog-category">
+        <div class="backlog-header">Should Have <span class="backlog-count">0 remaining</span></div>
+        <div class="backlog-items"></div>
+      </div>
+      <div class="backlog-category">
+        <div class="backlog-header">Could Have <span class="backlog-count">0 remaining</span></div>
+        <div class="backlog-items"></div>
+      </div>
+    </div>
+  </div>
+        
+        
+      </div>
+      <div class="right-column">
+        <div class="dash-section">
+    <div class="dash-section-header"><h2>Latest Commits</h2></div>
+    <div class="dash-section-content">
+      
+      
+        <div class="lesson-item">
+          <div class="lesson-date"><span class="commit-hash">655acb7</span> 2026-02-13<span class="commit-author">Paul Irving</span></div>
+          <div class="lesson-title">feat: add notification severity prefixes and answer reply threading</div>
+        </div>
+      
+        <div class="lesson-item">
+          <div class="lesson-date"><span class="commit-hash">312d762</span> 2026-02-13<span class="commit-author">Paul Irving</span></div>
+          <div class="lesson-title">fix: use @modelcontextprotocol/sdk v1 (v2 not yet published)</div>
+        </div>
+      
+        <div class="lesson-item">
+          <div class="lesson-date"><span class="commit-hash">9f2a909</span> 2026-02-13<span class="commit-author">Paul Irving</span></div>
+          <div class="lesson-title">feat: scaffold remote-decision-bridge project (REQ-0020)</div>
+        </div>
+      
+    </div>
+  </div>
+        <div class="dash-section">
+    <div class="dash-section-header"><h2>Upcoming Sprints</h2></div>
+    <div class="dash-section-content">
+      <div class="empty-state">No upcoming sprints</div>
+      
+    </div>
+  </div>
+        <div class="dash-section">
+    <div class="dash-section-header"><h2>Recent Sprints</h2></div>
+    <div class="dash-section-content">
+      <div class="empty-state">No recent sprints</div>
+      
+    </div>
+  </div>
+        <div class="dash-section">
+    <div class="dash-section-header"><h2>Active Risks</h2></div>
+    <div class="dash-section-content">
+      <div class="empty-state">No active risks</div>
+      
+    </div>
+  </div>
+        
+        
+        
+        <div class="dash-section">
+    <div class="dash-section-header"><h2><a href="ux-reviews-dashboard.html">UX Reviews</a></h2></div>
+    <div class="dash-section-content">
+      <div class="empty-state">No active UX reviews</div>
+      
+    </div>
+  </div>
+        <div class="dash-section">
+    <div class="dash-section-header"><h2>Recent Lessons</h2></div>
+    <div class="dash-section-content">
+      <div class="empty-state">No lessons recorded</div>
+      
+    </div>
+  </div>
+        
+      </div>
+    </div>
+  
+  </main>
+
+  <script>
+    
+function toggleNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+  var isOpen = menu.classList.contains('open');
+
+  menu.classList.toggle('open');
+  overlay.classList.toggle('open');
+  if (btn) btn.classList.toggle('open');
+}
+
+function closeNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+
+  menu.classList.remove('open');
+  overlay.classList.remove('open');
+  if (btn) btn.classList.remove('open');
+}
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeNavMenu();
+});
+
+
+    function refreshDashboard() {
+      var btn = document.querySelector('.refresh-btn');
+      if (btn) btn.classList.add('spinning');
+      var returnPath = window.location.pathname + window.location.search;
+      window.location.href = '/refresh?return=' + encodeURIComponent(returnPath);
+    }
+
+    
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabId = tab.dataset.tab;
+    const container = tab.closest('.dash-section-content');
+    container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    container.querySelector('#' + tabId).classList.add('active');
+  });
+});
+
+// Dependency view toggle
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const viewType = btn.dataset.view;
+    const section = btn.closest('.dash-section');
+    const header = btn.closest('.view-toggle');
+    header.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const content = section.querySelector('.dash-section-content');
+    content.querySelectorAll('.dep-view').forEach(v => v.classList.remove('active'));
+    const viewEl = content.querySelector('#dep-' + viewType + '-view');
+    if (viewEl) viewEl.classList.add('active');
+  });
+});
+
+  </script>
+</body>
+</html>

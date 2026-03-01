@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PM Cheatsheet - remote-decision-bridge</title>
+  <style>
+    
+:root {
+  /* ── Colors ── */
+  --bg: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  /* ── Semantic Colors ── */
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+
+  /* ── Extended Palette ── */
+  --purple: #a855f7;
+  --cyan: #06b6d4;
+  --orange: #f97316;
+
+  /* ── Borders ── */
+  --border: #334155;
+
+  /* ── Spacing Scale ── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* ── Typography ── */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+
+  --text-xs: 18px;
+  --text-sm: 20px;
+  --text-base: 24px;
+  --text-lg: 28px;
+  --text-xl: 34px;
+  --text-2xl: 40px;
+  --text-3xl: 48px;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Border Radius ── */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.3);
+
+  /* ── Status Colors (semantic mapping) ── */
+  --status-completed: var(--success);
+  --status-implemented: var(--cyan);
+  --status-active: var(--accent);
+  --status-approved: var(--purple);
+  --status-candidate: var(--orange);
+  --status-draft: var(--text-muted);
+  --status-rejected: var(--danger);
+  --status-deprecated: var(--text-dim);
+  --status-todo: var(--text-dim);
+  --status-in-progress: var(--cyan);
+  --status-done: var(--success);
+
+  /* ── Priority Colors ── */
+  --priority-must-have: var(--danger);
+  --priority-should-have: var(--warning);
+  --priority-could-have: var(--success);
+  --priority-wont-have: var(--text-dim);
+
+  /* ── Risk Colors ── */
+  --risk-high: var(--danger);
+  --risk-medium: var(--warning);
+  --risk-low: var(--success);
+
+  /* ── Transitions ── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+:root {
+  --bg: #0a1410;
+  --bg-card: #152420;
+  --bg-hover: #1e3530;
+  --text: #e8ede9;
+  --text-muted: #8fa898;
+  --text-dim: #5e7a68;
+  --accent: #4ade80;
+  --accent-hover: #86efac;
+  --border: #2d4a3a;
+  --purple: #a78bfa;
+  --cyan: #5eead4;
+  --orange: #fb923c;
+}
+    
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+    
+/* ── Hamburger Button ── */
+.hamburger-btn {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  transition: background var(--transition-fast);
+}
+
+.hamburger-btn:hover {
+  background: var(--bg-hover);
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ── Overlay ── */
+.nav-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.nav-menu-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Slide-in Menu ── */
+.nav-menu {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transition: right var(--transition-slow);
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-menu.open {
+  right: 0;
+}
+
+.nav-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-menu-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.nav-menu-close {
+  width: 48px;
+  height: 48px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-2xl);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-close:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* ── Links ── */
+.nav-menu-links {
+  flex: 1;
+  padding: var(--space-sm) 0;
+  overflow-y: auto;
+}
+
+.nav-menu-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-menu-link:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-menu-link.active {
+  color: var(--accent);
+  background: rgba(59,130,246,0.1);
+  border-right: 3px solid var(--accent);
+}
+
+.nav-menu-icon {
+  font-size: var(--text-lg);
+  width: 24px;
+  text-align: center;
+}
+
+.nav-menu-label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+}
+
+/* ── Footer ── */
+.nav-menu-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.nav-menu-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.nav-menu-meta-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.nav-menu-meta-value {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.nav-menu-refresh {
+  display: block;
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--accent);
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.nav-menu-refresh:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+    
+/* ── Badges ── */
+.c-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── Progress Bar ── */
+.c-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.c-progress-track {
+  width: 100%;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.c-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-slow);
+}
+
+.c-progress-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ── Entity Links ── */
+.c-entity-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+}
+
+.c-entity-link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* ── Stat Cards ── */
+.c-stat {
+  text-align: center;
+}
+
+.c-stat-value {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.c-stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* ── Breadcrumbs ── */
+.c-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.c-crumb {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.c-crumb:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.c-crumb--current {
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+.c-crumb-sep {
+  color: var(--text-dim);
+}
+
+
+    /* ── Page Header ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .page-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      min-width: 0;
+    }
+
+    .page-header-project {
+      font-size: var(--text-xl);
+      font-weight: var(--weight-bold);
+      color: var(--accent);
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .page-header-project + .c-breadcrumbs,
+    .page-header-project + .page-header-title {
+      padding-left: var(--space-md);
+      border-left: 2px solid var(--border);
+    }
+
+    .page-header-title {
+      font-size: var(--text-lg);
+      font-weight: var(--weight-semibold);
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .page-header-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-shrink: 0;
+    }
+
+    /* ── Refresh Button ── */
+    .refresh-btn {
+      width: 48px;
+      height: 48px;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+    }
+    .refresh-btn:hover {
+      background: var(--bg-hover);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    .refresh-btn.spinning svg {
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Main Content ── */
+    .page-main {
+      flex: 1;
+      padding: var(--space-lg);
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .page-header {
+        padding: var(--space-sm) var(--space-md);
+      }
+
+      .page-main {
+        padding: var(--space-md);
+      }
+    }
+
+    
+.doc-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  color: var(--text-muted);
+  line-height: var(--leading-relaxed);
+}
+.doc-content h1 { font-size: var(--text-2xl); color: var(--text); margin-bottom: var(--space-lg); }
+.doc-content h2 { font-size: var(--text-xl); color: var(--text); margin-top: var(--space-xl); margin-bottom: var(--space-md); border-bottom: 1px solid var(--border); padding-bottom: var(--space-sm); }
+.doc-content h3 { font-size: var(--text-lg); color: var(--text); margin-top: var(--space-lg); margin-bottom: var(--space-sm); }
+.doc-content h4 { font-size: var(--text-base); color: var(--text); margin-top: var(--space-md); margin-bottom: var(--space-xs); }
+.doc-content p { margin-bottom: var(--space-md); }
+.doc-content ul, .doc-content ol { padding-left: var(--space-xl); margin-bottom: var(--space-md); }
+.doc-content li { margin-bottom: var(--space-xs); }
+.doc-content code { background: var(--bg); padding: 2px 6px; border-radius: var(--radius-sm); font-size: var(--text-sm); }
+.doc-content pre { background: var(--bg); padding: var(--space-md); border-radius: var(--radius-md); overflow-x: auto; margin-bottom: var(--space-md); }
+.doc-content blockquote { border-left: 3px solid var(--accent); padding-left: var(--space-md); margin: var(--space-md) 0; color: var(--text-dim); }
+.doc-content strong { color: var(--text); }
+.doc-content hr { border: none; border-top: 1px solid var(--border); margin: var(--space-xl) 0; }
+
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="page-header-left">
+      <span class="page-header-project">remote-decision-bridge</span>
+      <nav class="c-breadcrumbs"><a href="dashboard.html" class="c-crumb">Dashboard</a><span class="c-crumb-sep">/</span><span class="c-crumb c-crumb--current">PM Cheatsheet</span></nav>
+      
+    </div>
+    <div class="page-header-right">
+      <button class="refresh-btn" onclick="refreshDashboard()" aria-label="Refresh dashboard" title="Refresh dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"></path>
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+          <path d="M3 22v-6h6"></path>
+          <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+        </svg>
+      </button>
+      <button class="hamburger-btn" onclick="toggleNavMenu()" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  
+  <div class="nav-menu-overlay" id="nav-menu-overlay" onclick="closeNavMenu()"></div>
+  <nav class="nav-menu" id="nav-menu">
+    <div class="nav-menu-header">
+      <span class="nav-menu-title">Navigation</span>
+      <button class="nav-menu-close" onclick="closeNavMenu()" aria-label="Close menu">&times;</button>
+    </div>
+    <div class="nav-menu-links">
+      <a href="mission-control.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎯</span>
+      <span class="nav-menu-label">Mission Control</span>
+    </a>
+      <a href="dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📊</span>
+      <span class="nav-menu-label">Dashboard</span>
+    </a>
+      <a href="requirements-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📋</span>
+      <span class="nav-menu-label">Requirements</span>
+    </a>
+      <a href="journal-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📖</span>
+      <span class="nav-menu-label">Journal</span>
+    </a>
+      <a href="product-spec.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📝</span>
+      <span class="nav-menu-label">Product Spec</span>
+    </a>
+      <a href="vision.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔭</span>
+      <span class="nav-menu-label">Vision</span>
+    </a>
+      <a href="ux-reviews-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🎨</span>
+      <span class="nav-menu-label">UX Reviews</span>
+    </a>
+      <a href="bugs-dashboard.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🐛</span>
+      <span class="nav-menu-label">Bugs</span>
+    </a>
+      <a href="traceability.html" class="nav-menu-link">
+      <span class="nav-menu-icon">🔗</span>
+      <span class="nav-menu-label">Traceability</span>
+    </a>
+      <a href="pm-cheatsheet.html" class="nav-menu-link active">
+      <span class="nav-menu-icon">📌</span>
+      <span class="nav-menu-label">PM Cheatsheet</span>
+    </a>
+      <a href="pm-reference.html" class="nav-menu-link">
+      <span class="nav-menu-icon">📚</span>
+      <span class="nav-menu-label">PM Reference</span>
+    </a>
+    </div>
+    <div class="nav-menu-footer">
+      <div class="nav-menu-meta">
+        <span class="nav-menu-meta-label">Last generated</span>
+        <span class="nav-menu-meta-value">Feb 13, 2026, 1:03 PM</span>
+      </div>
+      <a href="/refresh" class="nav-menu-refresh" title="Regenerate dashboard">Refresh Dashboard</a>
+    </div>
+  </nav>
+
+  <main class="page-main">
+    <div class="doc-content"><h1>Project Management Commands Cheatsheet</h1>
+<p>Quick reference for all project management commands in the Claude Code PM system.</p>
+<hr>
+<h2>Project Foundation</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/spec vision</code></td><td>Create project vision (optional)</td></tr><tr><td><code>/spec create</code></td><td>Create product specification (required)</td></tr><tr><td><code>/spec view</code></td><td>View current specification</td></tr><tr><td><code>/spec update</code></td><td>Update spec sections</td></tr><tr><td><code>/spec approve</code></td><td>Approve specification</td></tr><tr><td><code>/spec capabilities</code></td><td>List capabilities and linked requirements</td></tr></tbody></table>
+<hr>
+<h2>Requirements</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/requirement propose</code></td><td>Create candidate requirement (needs approval)</td></tr><tr><td><code>/requirement approve REQ-NNNN</code></td><td>Approve requirement for implementation</td></tr><tr><td><code>/requirement reject REQ-NNNN</code></td><td>Reject candidate with reason</td></tr><tr><td><code>/requirement create</code></td><td>Create new pre-approved requirement</td></tr><tr><td><code>/requirement create REQ-NNNN</code></td><td>Add detail to approved requirement</td></tr><tr><td><code>/requirement list</code></td><td>List all requirements by status</td></tr><tr><td><code>/requirement view REQ-NNNN</code></td><td>View specific requirement</td></tr><tr><td><code>/requirement update-ac REQ-NNNN AC-01 complete</code></td><td>Mark acceptance criteria done</td></tr><tr><td><code>/requirement update-ac REQ-NNNN AC-01,AC-02 complete</code></td><td>Mark multiple ACs done</td></tr><tr><td><code>/requirement sync</code></td><td>Regenerate requirements index</td></tr><tr><td><code>/requirement validate</code></td><td>Check requirement consistency</td></tr></tbody></table>
+<hr>
+<h2>Solutions</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/solution create</code></td><td>Create solution proposal</td></tr><tr><td><code>/solution list</code></td><td>List all solutions</td></tr><tr><td><code>/solution compare</code></td><td>Compare solution alternatives</td></tr></tbody></table>
+<hr>
+<h2>Backlog</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/backlog add</code></td><td>Add item to backlog</td></tr><tr><td><code>/backlog list</code></td><td>View backlog by priority</td></tr><tr><td><code>/backlog prioritize</code></td><td>Reorder backlog items</td></tr><tr><td><code>/backlog groom</code></td><td>Run grooming session</td></tr><tr><td><code>/backlog move &lt;item&gt; &lt;priority&gt;</code></td><td>Change item priority</td></tr></tbody></table>
+<hr>
+<h2>Sprints</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/sprint start</code></td><td>Start new sprint</td></tr><tr><td><code>/sprint status</code></td><td>View current sprint progress</td></tr><tr><td><code>/sprint add &lt;item&gt;</code></td><td>Add item to current sprint</td></tr><tr><td><code>/sprint complete &lt;item&gt;</code></td><td>Mark item done</td></tr><tr><td><code>/sprint review</code></td><td>End-of-sprint review</td></tr></tbody></table>
+<hr>
+<h2>Daily Work</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/standup</code></td><td>Quick daily standup</td></tr><tr><td><code>/standup quick</code></td><td>Minimal status update</td></tr><tr><td><code>/standup detailed</code></td><td>Comprehensive update</td></tr><tr><td><code>/standup yesterday</code></td><td>Review yesterday's work</td></tr></tbody></table>
+<hr>
+<h2>Retrospectives</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/retrospective</code></td><td>Standard retro (went well/improve/actions)</td></tr><tr><td><code>/retrospective standard</code></td><td>Same as above</td></tr><tr><td><code>/retrospective start-stop-continue</code></td><td>Behavior-focused retro</td></tr><tr><td><code>/retrospective 4ls</code></td><td>Liked/Learned/Lacked/Longed for</td></tr></tbody></table>
+<hr>
+<h2>Bugs</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/bug create</code></td><td>Report a new bug</td></tr><tr><td><code>/bug list</code></td><td>View open bugs by severity</td></tr><tr><td><code>/bug view BUG-NNNN</code></td><td>View specific bug</td></tr><tr><td><code>/bug update BUG-NNNN</code></td><td>Update bug status</td></tr><tr><td><code>/bug triage</code></td><td>Run bug triage session</td></tr><tr><td><code>/bug close BUG-NNNN</code></td><td>Close resolved bug</td></tr></tbody></table>
+<hr>
+<h2>Incidents</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/incident create</code></td><td>Log a new incident</td></tr><tr><td><code>/incident list</code></td><td>List incidents by status</td></tr><tr><td><code>/incident view INC-NNNN</code></td><td>View specific incident</td></tr><tr><td><code>/incident update INC-NNNN</code></td><td>Update incident status</td></tr><tr><td><code>/incident postmortem INC-NNNN</code></td><td>Write post-incident review</td></tr><tr><td><code>/incident close INC-NNNN</code></td><td>Close resolved incident</td></tr></tbody></table>
+<hr>
+<h2>UX Reviews</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/ux-review plan</code></td><td>Plan a new UX review</td></tr><tr><td><code>/ux-review start UXR-NNNN</code></td><td>Begin review session</td></tr><tr><td><code>/ux-review findings UXR-NNNN</code></td><td>Document findings</td></tr><tr><td><code>/ux-review action-plan UXR-NNNN</code></td><td>Create action plan</td></tr><tr><td><code>/ux-review verify UXR-NNNN</code></td><td>Verify fixes applied</td></tr><tr><td><code>/ux-review close UXR-NNNN</code></td><td>Close completed review</td></tr><tr><td><code>/ux-review list</code></td><td>List all UX reviews</td></tr><tr><td><code>/ux-review view UXR-NNNN</code></td><td>View specific review</td></tr></tbody></table>
+<hr>
+<h2>Releases</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/release plan</code></td><td>Plan new release</td></tr><tr><td><code>/release prepare</code></td><td>Verify release readiness</td></tr><tr><td><code>/release checklist</code></td><td>Create deployment checklist</td></tr><tr><td><code>/release notes</code></td><td>Generate release notes</td></tr><tr><td><code>/release deploy</code></td><td>Execute deployment</td></tr><tr><td><code>/release rollback</code></td><td>Rollback failed release</td></tr></tbody></table>
+<hr>
+<h2>Risks</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/risk create</code></td><td>Log new risk</td></tr><tr><td><code>/risk list</code></td><td>List active risks</td></tr><tr><td><code>/risk view RISK-NNNN</code></td><td>View specific risk</td></tr><tr><td><code>/risk update RISK-NNNN</code></td><td>Update risk status</td></tr><tr><td><code>/risk assess</code></td><td>Run risk identification session</td></tr><tr><td><code>/risk matrix</code></td><td>View probability/impact matrix</td></tr></tbody></table>
+<hr>
+<h2>Change Control</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/change create</code></td><td>Create change request</td></tr><tr><td><code>/change list</code></td><td>List pending changes</td></tr><tr><td><code>/change view CR-NNNN</code></td><td>View specific change</td></tr><tr><td><code>/change approve CR-NNNN</code></td><td>Approve change</td></tr><tr><td><code>/change reject CR-NNNN</code></td><td>Reject change</td></tr><tr><td><code>/change implement CR-NNNN</code></td><td>Track implementation</td></tr></tbody></table>
+<hr>
+<h2>Dashboard</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/dashboard</code></td><td>Generate and view project dashboard</td></tr></tbody></table>
+<hr>
+<h2>Status Reporting</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/status quick</code></td><td>Fast status snapshot</td></tr><tr><td><code>/status weekly</code></td><td>Weekly status report</td></tr><tr><td><code>/status monthly</code></td><td>Monthly summary</td></tr></tbody></table>
+<hr>
+<h2>Journal & Documentation</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/journal decision &lt;name&gt;</code></td><td>Record architecture decision</td></tr><tr><td><code>/journal lesson &lt;name&gt;</code></td><td>Document lesson learned</td></tr><tr><td><code>/journal session</code></td><td>Create session summary</td></tr><tr><td><code>/journal feature &lt;name&gt;</code></td><td>Track feature progress</td></tr><tr><td><code>/session-summary</code></td><td>End-of-session documentation</td></tr></tbody></table>
+<hr>
+<h2>Development Workflow</h2>
+<table class="md-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody><tr><td><code>/start-work</code></td><td>Create feature branch</td></tr><tr><td><code>/finish-work</code></td><td>Merge current branch to master and cleanup</td></tr></tbody></table>
+<hr>
+<h2>Common Workflows</h2>
+<h3>Start a New Project</h3>
+<pre><code>
+/spec vision              # Optional: define why
+/spec create              # Required: define what
+/spec approve             # Lock in the spec
+/requirement propose      # Create requirements from capabilities
+/requirement approve REQ-0001
+/backlog add              # Build the backlog
+/risk assess              # Identify initial risks
+</code></pre>
+<h3>Daily Development</h3>
+<pre><code>
+/standup                  # Morning status
+/sprint status            # Check progress
+... work ...
+/requirement update-ac REQ-0001 AC-01 complete
+/sprint complete &lt;item&gt;   # When done
+</code></pre>
+<h3>End of Sprint</h3>
+<pre><code>
+/sprint review            # What was delivered
+/retrospective            # What to improve
+/sprint start             # Begin next sprint
+</code></pre>
+<h3>Release</h3>
+<pre><code>
+/release plan             # Define what&#039;s shipping
+/release prepare          # Verify readiness
+/release checklist        # Create deployment steps
+/release deploy           # Ship it
+</code></pre>
+<hr>
+<h2>Entity ID Formats</h2>
+<table class="md-table"><thead><tr><th>Entity</th><th>Format</th><th>Example</th></tr></thead><tbody><tr><td>Capability</td><td>CAP-NN</td><td>CAP-01</td></tr><tr><td>Requirement</td><td>REQ-NNNN</td><td>REQ-0001</td></tr><tr><td>Solution</td><td>SOL-NNNN</td><td>SOL-0001</td></tr><tr><td>Risk</td><td>RISK-NNNN</td><td>RISK-0001</td></tr><tr><td>Sprint</td><td>SPRINT-NN</td><td>SPRINT-01</td></tr><tr><td>Release</td><td>REL-X.Y.Z</td><td>REL-1.0.0</td></tr><tr><td>Change Request</td><td>CR-NNNN</td><td>CR-0001</td></tr><tr><td>Bug</td><td>BUG-NNNN</td><td>BUG-0001</td></tr><tr><td>Incident</td><td>INC-NNNN</td><td>INC-0001</td></tr><tr><td>UX Review</td><td>UXR-NNNN</td><td>UXR-0001</td></tr><tr><td>Deployment</td><td>DEPLOY-{REL}</td><td>DEPLOY-REL-1.0.0</td></tr><tr><td>Status Report</td><td>STATUS-YYYY-WNN</td><td>STATUS-2026-W03</td></tr></tbody></table>
+<hr>
+<h2>Requirement Lifecycle</h2>
+<pre><code>
+candidate → approved → draft → active → implemented → completed
+    ↓           ↓
+ rejected   deprecated
+</code></pre>
+<hr>
+<h2>File Locations</h2>
+<pre><code>
+.claude/
+├── project-management/
+│   ├── vision.md              # Project vision
+│   ├── product-spec.md        # Product specification
+│   ├── backlog.md             # Product backlog
+│   ├── risks/                 # RISK-NNNN.md
+│   ├── sprints/               # SPRINT-NN.md
+│   ├── releases/              # REL-X.Y.Z.md, DEPLOY-*.md
+│   ├── changes/               # CR-NNNN.md
+│   ├── bugs/                  # BUG-NNNN.md
+│   ├── incidents/             # INC-NNNN.md
+│   ├── ux-reviews/            # UXR-NNNN.md
+│   └── status/                # STATUS-*.md
+├── requirements/
+│   ├── requirements/          # REQ-NNNN.md
+│   ├── solutions/             # SOL-NNNN.md
+│   └── REQUIREMENTS-INDEX.md
+└── journal/
+    ├── decisions/
+    ├── lessons/
+    └── sessions/
+</code></pre>
+<hr>
+<p><em>See <a href="docs/PROJECT-MANAGEMENT-REFERENCE.md">PROJECT-MANAGEMENT-REFERENCE.md</a> for complete documentation.</em></p></div>
+  </main>
+
+  <script>
+    
+function toggleNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+  var isOpen = menu.classList.contains('open');
+
+  menu.classList.toggle('open');
+  overlay.classList.toggle('open');
+  if (btn) btn.classList.toggle('open');
+}
+
+function closeNavMenu() {
+  var menu = document.getElementById('nav-menu');
+  var overlay = document.getElementById('nav-menu-overlay');
+  var btn = document.querySelector('.hamburger-btn');
+
+  menu.classList.remove('open');
+  overlay.classList.remove('open');
+  if (btn) btn.classList.remove('open');
+}
+
+// Close on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeNavMenu();
+});
+
+
+    function refreshDashboard() {
+      var btn = document.querySelector('.refresh-btn');
+      if (btn) btn.classList.add('spinning');
+      var returnPath = window.location.pathname + window.location.search;
+      window.location.href = '/refresh?return=' + encodeURIComponent(returnPath);
+    }
+
+    
+  </script>
+</body>
+</html>

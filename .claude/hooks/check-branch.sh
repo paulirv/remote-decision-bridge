@@ -1,0 +1,1 @@
+/Users/paulirving/.claude/hooks/check-branch.sh

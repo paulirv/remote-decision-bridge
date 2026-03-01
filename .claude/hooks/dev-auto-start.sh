@@ -1,0 +1,1 @@
+/Users/paulirving/.claude/hooks/dev-auto-start.sh

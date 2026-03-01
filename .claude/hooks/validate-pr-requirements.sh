@@ -1,0 +1,1 @@
+/Users/paulirving/.claude/hooks/validate-pr-requirements.sh

@@ -1,0 +1,1 @@
+/Users/paulirving/.claude/hooks/rdb-enforce-ask-remote.sh

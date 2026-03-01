@@ -1,0 +1,88 @@
+{
+  "projectContext": {
+    "name": "remote-decision-bridge",
+    "type": "web",
+    "owner": "Paul Irving",
+    "company": "Insite Web Publishing, Inc."
+  },
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch",
+      "Bash(ls:*)",
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(git:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/check-branch.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/check-branch.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/check-branch.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/check-branch.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/strip-ai-boilerplate.sh"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-commit-message.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/strip-ai-boilerplate.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/validate-commit-message.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-summary-reminder.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/session-summary-reminder.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

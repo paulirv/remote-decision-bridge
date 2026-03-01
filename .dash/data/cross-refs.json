@@ -1,0 +1,90 @@
+{
+  "_meta": {
+    "generated": "2026-02-13T21:03:34.008Z"
+  },
+  "reqToSol": {
+    "REQ-0021": [
+      "SOL-0003"
+    ],
+    "REQ-0022": [
+      "SOL-0003"
+    ],
+    "REQ-0023": [
+      "SOL-0003"
+    ],
+    "REQ-0024": [
+      "SOL-0003"
+    ],
+    "REQ-0025": [
+      "SOL-0003"
+    ],
+    "REQ-0026": [
+      "SOL-0003"
+    ]
+  },
+  "solToReq": {
+    "SOL-0003": [
+      "REQ-0021",
+      "REQ-0022",
+      "REQ-0023",
+      "REQ-0024",
+      "REQ-0025",
+      "REQ-0026"
+    ]
+  },
+  "reqToSprint": {},
+  "sprintToReq": {},
+  "reqToUxr": {},
+  "uxrToReq": {},
+  "bugToReq": {},
+  "reqToBug": {},
+  "reqToRelease": {},
+  "releaseToReq": {},
+  "sprintToRelease": {},
+  "releaseToSprint": {},
+  "incidentToRelease": {},
+  "releaseToIncident": {},
+  "dependencies": {
+    "REQ-0022": [
+      "REQ-0021"
+    ],
+    "REQ-0025": [
+      "REQ-0021",
+      "REQ-0023"
+    ],
+    "REQ-0026": [
+      "REQ-0021",
+      "REQ-0022"
+    ]
+  },
+  "blockers": {},
+  "relatedTo": {
+    "REQ-0021": [
+      "REQ-0020",
+      "REQ-0022",
+      "REQ-0024"
+    ],
+    "REQ-0022": [
+      "REQ-0020",
+      "REQ-0021",
+      "REQ-0026"
+    ],
+    "REQ-0023": [
+      "REQ-0020",
+      "REQ-0024",
+      "REQ-0025"
+    ],
+    "REQ-0024": [
+      "REQ-0020",
+      "REQ-0021",
+      "REQ-0022",
+      "REQ-0023"
+    ],
+    "REQ-0025": [
+      "REQ-0020"
+    ],
+    "REQ-0026": [
+      "REQ-0020"
+    ]
+  }
+}
