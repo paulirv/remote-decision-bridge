@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
-import type { Env, QuestionPayload, StoredQuestion } from '../types.js';
+import type { DeliveredMessage, Env, QuestionPayload, StoredQuestion } from '../types.js';
 import { sendQuestion } from '../lib/telegram.js';
 import { authMiddleware } from '../lib/auth.js';
+import { resolveRecipients } from '../lib/recipients.js';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -13,6 +14,11 @@ app.post('/', async (c) => {
 
   if (!body.text || !body.options?.length || !body.sessionId) {
     return c.json({ error: 'Missing required fields: text, options, sessionId' }, 400);
+  }
+
+  const resolved = resolveRecipients(c.env, body.recipients);
+  if (!resolved.ok) {
+    return c.json({ error: resolved.error }, 400);
   }
 
   const id = crypto.randomUUID();
@@ -32,11 +38,16 @@ app.post('/', async (c) => {
     expirationTtl: ttl + 60,
   });
 
-  // Send to Telegram
-  const messageId = await sendQuestion(c.env, id, body.text, body.options, body.sessionId, body.project);
+  // Send to Telegram — one message per recipient chat
+  const messages: DeliveredMessage[] = [];
+  for (const chatId of resolved.chatIds) {
+    const messageId = await sendQuestion(c.env, id, body.text, body.options, body.sessionId, body.project, chatId);
+    if (messageId) messages.push({ chatId, messageId });
+  }
 
-  if (messageId) {
-    question.telegramMessageId = messageId;
+  if (messages.length) {
+    question.telegramMessageId = messages[0].messageId;
+    question.messages = messages;
     await c.env.QUESTIONS.put(`q:${id}`, JSON.stringify(question), {
       expirationTtl: ttl + 60,
     });

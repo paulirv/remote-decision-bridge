@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import type { Env, StoredQuestion } from '../types.js';
-import { sendAnswerConfirmation } from '../lib/telegram.js';
+import type { DeliveredMessage, Env, StoredQuestion } from '../types.js';
+import { sendAlreadyDecided, sendAnswerConfirmation } from '../lib/telegram.js';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -56,18 +56,9 @@ app.post('/', async (c) => {
     const question: StoredQuestion = JSON.parse(raw);
     const optionIndex = parseInt(selection, 10);
     const answer = question.options[optionIndex] ?? selection;
+    const chatId = update.callback_query.message?.chat.id;
 
-    question.answer = answer;
-    question.answeredAt = new Date().toISOString();
-    await c.env.QUESTIONS.put(`q:${questionId}`, JSON.stringify(question), {
-      expirationTtl: 120,
-    });
-
-    // Thread confirmation reply to the original question message
-    if (question.telegramMessageId) {
-      await sendAnswerConfirmation(c.env, answer, question.telegramMessageId);
-    }
-
+    await recordAnswer(c.env, question, answer, chatId === undefined ? undefined : String(chatId));
     return c.json({ ok: true });
   }
 
@@ -80,16 +71,7 @@ app.post('/', async (c) => {
       const raw = await c.env.QUESTIONS.get(`q:${pendingQuestionId}`);
       if (raw) {
         const question: StoredQuestion = JSON.parse(raw);
-        question.answer = update.message.text;
-        question.answeredAt = new Date().toISOString();
-        await c.env.QUESTIONS.put(`q:${pendingQuestionId}`, JSON.stringify(question), {
-          expirationTtl: 120,
-        });
-
-        // Thread confirmation reply to the original question message
-        if (question.telegramMessageId) {
-          await sendAnswerConfirmation(c.env, update.message.text, question.telegramMessageId);
-        }
+        await recordAnswer(c.env, question, update.message.text, String(chatId));
       }
       await c.env.QUESTIONS.delete(`pending:${chatId}`);
     }
@@ -97,6 +79,46 @@ app.post('/', async (c) => {
 
   return c.json({ ok: true });
 });
+
+/**
+ * Record the first answer to a question and confirm it in every chat the
+ * question reached. A question is decided once: a later answer — from the same
+ * chat or another recipient's — changes nothing and is told which answer stands.
+ */
+async function recordAnswer(
+  env: Env,
+  question: StoredQuestion,
+  answer: string,
+  answeringChatId?: string,
+): Promise<void> {
+  const delivered = deliveredMessages(env, question);
+
+  if (question.answer !== undefined) {
+    if (answeringChatId) {
+      const own = delivered.find((m) => m.chatId === answeringChatId);
+      await sendAlreadyDecided(env, question.answer, answeringChatId, own?.messageId);
+    }
+    return;
+  }
+
+  question.answer = answer;
+  question.answeredAt = new Date().toISOString();
+  await env.QUESTIONS.put(`q:${question.id}`, JSON.stringify(question), {
+    expirationTtl: 120,
+  });
+
+  // Thread a confirmation reply to the question in each recipient's chat
+  for (const m of delivered) {
+    await sendAnswerConfirmation(env, answer, m.messageId, m.chatId);
+  }
+}
+
+/** The messages a question was delivered as; a pre-recipient question reached only the default chat. */
+function deliveredMessages(env: Env, question: StoredQuestion): DeliveredMessage[] {
+  if (question.messages?.length) return question.messages;
+  if (question.telegramMessageId) return [{ chatId: env.TELEGRAM_CHAT_ID, messageId: question.telegramMessageId }];
+  return [];
+}
 
 async function answerCallback(env: Env, callbackQueryId: string): Promise<void> {
   await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/answerCallbackQuery`, {
