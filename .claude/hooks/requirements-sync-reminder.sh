@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/hooks/requirements-sync-reminder.sh

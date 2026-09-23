@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/hooks/update-traceability-on-commit.sh

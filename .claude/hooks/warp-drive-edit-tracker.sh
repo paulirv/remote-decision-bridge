@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/hooks/warp-drive-edit-tracker.sh

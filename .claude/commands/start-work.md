@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/commands/start-work.md

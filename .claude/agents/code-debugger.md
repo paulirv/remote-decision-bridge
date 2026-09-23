@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/registry/agents/code-debugger.md

@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/registry/commands/status.md

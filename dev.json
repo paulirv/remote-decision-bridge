@@ -1,7 +1,7 @@
 {
   "server": {
     "command": "npm run dev",
-    "port": 5173,
+    "port": 5910,
     "health": "/",
     "restart": "on-failure",
     "env": {}
@@ -9,5 +9,13 @@
   "access": {
     "localhost": "http://localhost:5173",
     "farm_01": null
+  },
+  "_bob_ports": {
+    "_comment": "generated from the operator's ports.json — do not edit (regenerate via bob init)",
+    "base": 5910,
+    "vite": 5910,
+    "wrangler": 5911,
+    "dashboard": 5912,
+    "docs": 5913
   }
 }
