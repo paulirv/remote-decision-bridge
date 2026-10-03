@@ -53,15 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/strip-ai-boilerplate.sh"
-          },
-          {
-            "type": "command",
             "command": ".claude/hooks/validate-commit-message.sh"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/strip-ai-boilerplate.sh"
           },
           {
             "type": "command",
