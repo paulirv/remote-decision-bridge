@@ -61,20 +61,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": ".claude/hooks/session-summary-reminder.sh"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/session-summary-reminder.sh"
-          }
-        ]
-      }
     ]
   }
 }
