@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/hooks/temporal-context.sh

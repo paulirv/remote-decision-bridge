@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/hooks/pre-release-checklist.sh

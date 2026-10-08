@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/hooks/validate-commit-message.sh

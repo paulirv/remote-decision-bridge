@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/hooks/session-summary-reminder.sh

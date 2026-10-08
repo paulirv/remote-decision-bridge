@@ -1,1 +1,0 @@
-/Users/paulirving/.claude/commands/pr.md
