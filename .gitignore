@@ -52,7 +52,6 @@ coverage/
 .claude/hooks/pre-release-checklist.sh
 .claude/hooks/rdb-enforce-ask-remote.sh
 .claude/hooks/session-branch-guard.sh
-.claude/hooks/session-summary-reminder.sh
 .claude/hooks/stop-notify-rdb.sh
 .claude/hooks/strip-ai-boilerplate.sh
 .claude/hooks/temporal-context.sh
