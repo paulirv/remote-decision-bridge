@@ -7,7 +7,7 @@
     "env": {}
   },
   "access": {
-    "localhost": "http://localhost:5173",
+    "localhost": "http://localhost:5910",
     "farm_01": null
   },
   "_bob_ports": {
